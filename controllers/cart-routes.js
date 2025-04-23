@@ -5,7 +5,7 @@ const Cart = require('../models/cart') //Import the Cart model
 //POST - 'localhost:8080/api/cart - create a new cart - Any User
 router.post('/', async (req, res) => {
   try {
-    //get request body
+    //get cart data from the request body
     const { userId, itemsList } = req.body
 
     if (!userId || !itemsList) {
@@ -21,6 +21,7 @@ router.post('/', async (req, res) => {
     //save new cart to database
     await newCart.save()
 
+    //return the successful response
     res.status(200).json({
       result: newCart,
       message: 'Cart was created successfully!'
@@ -50,7 +51,7 @@ router.get('/:id', async (req, res) => {
       })
     }
 
-    //if cart was found
+    //if cart was found, return the successful response
     res.status(200).json({
       result: cart,
       message: 'Cart was retrieved successfully'
@@ -66,6 +67,22 @@ router.get('/:id', async (req, res) => {
 //PUT one- 'localhost:8080/api/cart/:id - update one cart by ID - Any User
 router.put('/:id', async (req, res) => {
   try {
+    //get the cart ID from request params
+    const { _id } = req.params
+
+    //get the updated fields (updated list of products) from the request body
+    const { itemsList } = req.body
+
+    const updatedCart = { itemsList }
+
+    //find the cart and update its fields
+    await Cart.findByIdAndUpdate(_id, updatedCart)
+
+    //return the successful message
+    res.status(200).json({
+      result: updatedCart,
+      message: 'Cart was updated!'
+    })
   } catch (error) {
     //return a 500 stats code and an error message
     res.status(500).json({
@@ -77,6 +94,17 @@ router.put('/:id', async (req, res) => {
 //Delete one - 'localhost:8080/api/cart/:id' - delete one cart by ID - Any User
 router.delete('/:id', async (req, res) => {
   try {
+    //get the cart ID from request params
+    const { _id } = req.params
+
+    //find the cart by ID to be deleted.
+    const deletedCart = await Cart.findByIdAndDelete(_id)
+
+    //send successful response
+    res.status(200).json({
+      result: deletedCart,
+      message: 'Cart was deleted!'
+    })
   } catch (error) {
     //return a 500 stats code and an error message
     res.status(500).json({
