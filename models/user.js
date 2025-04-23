@@ -35,6 +35,7 @@ const userSchema = new mongoose.Schema({
     isAdmin: {
         type: Boolean, default: false
     },
+    deletionRequest: { type: Boolean, default: false },
 }, {
     timestamps: true // Automatically add createdAt and updatedAt timestamps 
 });
