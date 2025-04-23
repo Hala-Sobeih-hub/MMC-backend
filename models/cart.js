@@ -32,6 +32,15 @@ const cartSchema = new mongoose.Schema(
       }
     ],
 
+    deliveryAddress: {
+      type: String,
+      required: true
+    },
+
+    eventNotes: {
+      type: String
+    },
+
     // Optional status field to track cart progress
     status: {
       type: String,

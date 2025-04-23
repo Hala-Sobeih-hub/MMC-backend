@@ -10,7 +10,12 @@ const bookingSchema = new mongoose.Schema(
       required: true
     },
 
-    items: [
+    email: {
+      type: String,
+      required: true
+    },
+
+    itemsList: [
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId,
@@ -40,6 +45,15 @@ const bookingSchema = new mongoose.Schema(
     rentalDate: {
       type: Date,
       required: true
+    },
+
+    deliveryAddress: {
+      type: String,
+      required: true
+    },
+
+    eventNotes: {
+      type: String
     },
 
     status: {

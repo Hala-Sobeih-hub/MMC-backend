@@ -6,17 +6,41 @@ const Booking = require('../models/booking') //Import the Booking model
 router.post('/', async (req, res) => {
   try {
     //get booking data from the request body
-    const { userId, itemsList } = req.body
+    const {
+      userId,
+      email,
+      itemsList,
+      totalPrice,
+      rentalDate,
+      deliveryAddress,
+      eventNotes
+    } = req.body
 
-    if (!userId || !itemsList) {
-      //if any of the fields are missing
+    //if any of the fields are missing
+    if (
+      !userId ||
+      !email ||
+      !itemsList ||
+      !totalPrice ||
+      !rentalDate ||
+      !deliveryAddress
+    ) {
       return res.status(401).json({
         message: 'All fields are Required!' // Return a 401 status code and a message
       })
     }
 
     //create a new booking object
-    const newBooking = new Booking({ userId, itemsList })
+    const newBooking = new Booking({
+      userId,
+      email,
+      itemsList,
+      totalPrice,
+      rentalDate,
+      deliveryAddress,
+      eventNotes,
+      status: 'confirmed'
+    })
 
     //save new booking to database
     await newBooking.save()
@@ -72,13 +96,17 @@ router.put(
       //get the booking ID from request params
       const { _id } = req.params
 
-      //get the updated fields (updated list of products) from the request body
-      const { itemsList } = req.body
+      //get the updated fields (updated status) from the request body
+      const { status } = req.body
 
-      const updatedBooking = { itemsList }
+      const updatedBooking = { status }
+
+      //options: (Optional) An object specifying options such as new
+      //new: If set to true, returns the modified document rather than the original. Defaults to false.
+      const options = { new: true }
 
       //find the booking and update its fields
-      await Booking.findByIdAndUpdate(_id, updatedBooking)
+      await Booking.findByIdAndUpdate(_id, updatedBooking, options)
 
       //return the successful message
       res.status(200).json({

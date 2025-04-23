@@ -6,17 +6,23 @@ const Cart = require('../models/cart') //Import the Cart model
 router.post('/', async (req, res) => {
   try {
     //get cart data from the request body
-    const { userId, itemsList } = req.body
+    const { userId, itemsList, deliveryAddress, eventNotes } = req.body
 
-    if (!userId || !itemsList) {
-      //if any of the fields are missing
+    //if any of the fields are missing
+    if (!userId || !itemsList || !deliveryAddress || !eventNotes) {
       return res.status(401).json({
         message: 'All fields are Required!' // Return a 401 status code and a message
       })
     }
 
     //create a new cart object
-    const newCart = new Cart({ userId, itemsList })
+    const newCart = new Cart({
+      userId,
+      itemsList,
+      deliveryAddress,
+      eventNotes,
+      status: 'active'
+    })
 
     //save new cart to database
     await newCart.save()
@@ -71,9 +77,9 @@ router.put('/:id', async (req, res) => {
     const { _id } = req.params
 
     //get the updated fields (updated list of products) from the request body
-    const { itemsList } = req.body
+    const { itemsList, deliveryAddress, eventNotes } = req.body
 
-    const updatedCart = { itemsList }
+    const updatedCart = { itemsList, deliveryAddress, eventNotes }
 
     //find the cart and update its fields
     await Cart.findByIdAndUpdate(_id, updatedCart)
