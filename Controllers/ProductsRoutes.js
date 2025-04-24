@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Products = require('../models/Products.js')
+const isAdmin = require('../middleware/authMiddleware.js')
 
 router.get('/', async (req, res) => {
     try {
