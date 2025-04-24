@@ -58,8 +58,8 @@ router.post('/', async (req, res) => {
   }
 })
 
-//GET one - 'localhost:8080/api/booking/:id' - display one booking by ID - Any User
-router.get('/:id', async (req, res) => {
+//GET one - 'localhost:8080/api/booking/:_id' - display one booking by ID - Any User
+router.get('/:_id', async (req, res) => {
   try {
     //get the booking ID from the request params
     const { _id } = req.params
@@ -88,9 +88,9 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-//PUT one- 'localhost:8080/api/booking/:id - update one booking by ID - Admin Only
+//PUT one- 'localhost:8080/api/booking/:_id - update one booking by ID - Admin Only
 router.put(
-  '/:id',
+  '/:_id',
   /* authenticateToken, */ async (req, res) => {
     try {
       //get the booking ID from request params
@@ -122,9 +122,9 @@ router.put(
   }
 )
 
-//Delete one - 'localhost:8080/api/booking/:id' - delete one booking by ID - Admin Only
+//Delete one - 'localhost:8080/api/booking/:_id' - delete one booking by ID - Admin Only
 router.delete(
-  '/:id',
+  '/:_id',
   /* authenticateToken, */ async (req, res) => {
     try {
       //get the booking ID from request params

@@ -40,8 +40,8 @@ router.post('/', async (req, res) => {
   }
 })
 
-//GET one - 'localhost:8080/api/cart/:id' - display one cart by ID - Any User
-router.get('/:id', async (req, res) => {
+//GET one - 'localhost:8080/api/cart/:_id' - display one cart by ID - Any User
+router.get('/:_id', async (req, res) => {
   try {
     //get the cart ID from the request params
     const { _id } = req.params
@@ -70,8 +70,8 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-//PUT one- 'localhost:8080/api/cart/:id - update one cart by ID - Any User
-router.put('/:id', async (req, res) => {
+//PUT one- 'localhost:8080/api/cart/:_id - update one cart by ID - Any User
+router.put('/:_id', async (req, res) => {
   try {
     //get the cart ID from request params
     const { _id } = req.params
@@ -97,8 +97,8 @@ router.put('/:id', async (req, res) => {
   }
 })
 
-//Delete one - 'localhost:8080/api/cart/:id' - delete one cart by ID - Any User
-router.delete('/:id', async (req, res) => {
+//Delete one - 'localhost:8080/api/cart/:_id' - delete one cart by ID - Any User
+router.delete('/:_id', async (req, res) => {
   try {
     //get the cart ID from request params
     const { _id } = req.params
