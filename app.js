@@ -13,6 +13,7 @@ app.use(express.json())
 const dotenv = require('dotenv')
 const cors = require('cors')
 const authMiddleware = require('./middleware/authMiddleware.js')
+const userRoutes = require('./routes/user_routes.js')
 
 dotenv.config()
 
@@ -33,10 +34,14 @@ const cartController = require('./controllers/cart-routes.js')
 //* Routes
 app.use('/api/cart', cartController)
 app.use(authMiddleware);
+app.use('/api/users', userRoutes);
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+
 
 
 
