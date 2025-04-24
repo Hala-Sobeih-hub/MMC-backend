@@ -10,7 +10,6 @@ const PORT = process.env.PORT || 8080
 
 const authMiddleware = require('./middleware/authMiddleware.js')
 
-
 dotenv.config()
 
 // Middleware
@@ -22,22 +21,20 @@ const connectDB = require('./config/database.js')
 connectDB()
 
 //* Imports for controllers
-const cartController = require('./controllers/cart-routes.js')
-const bookingController = require('./controllers/booking-routes.js')
-const testimonialsController = require('./controllers/TestimonialsRoutes.js')
-const productsController = require('./controllers/ProductsRoutes.js')
-const userController = require('./controllers/user_controllers.js')
+const cartController = require('./controller/cart-routes.js')
+const bookingController = require('./controller/booking-routes.js')
+const testimonialsController = require('./controller/TestimonialsRoutes.js')
+const productsController = require('./controller/ProductsRoutes.js')
+const userController = require('./controller/user_controllers.js')
 
 //* Routes
 app.use('/api/cart', cartController)
-app.use(authMiddleware);
+app.use(authMiddleware)
 
 app.use('/api/testimonials', testimonialsController)
 app.use('/api/products', productsController)
 
-app.use('/api/users', userController);
-
-
+app.use('/api/users', userController)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
