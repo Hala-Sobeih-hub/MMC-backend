@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt'); // Import bcrypt for password hashing
 const jwt = require('jsonwebtoken'); // Import jsonwebtoken for token generation
 const authMiddleware = require('../middleware/authMiddleware.js'); // Import the authentication middleware
 
-const router = express.Router();
+const router = express.Router()
 
 router.post('/signup', async (req, res) => {
     try {
