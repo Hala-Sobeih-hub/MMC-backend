@@ -78,3 +78,5 @@ router.put('/:id', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' }); // Send a 500 status with an error message
     }
 });
+
+module.exports = router; 

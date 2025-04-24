@@ -1,8 +1,8 @@
-import express from 'express';
-import User from '../models/user.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import authMiddleware from '../middleware/authMiddleware.js';
+const express = require('express');
+const User = require('../models/user.js'); // Import the User model
+const bcrypt = require('bcrypt'); // Import bcrypt for password hashing
+const jwt = require('jsonwebtoken'); // Import jsonwebtoken for token generation
+const authMiddleware = require('../middleware/authMiddleware.js'); // Import the authentication middleware
 
 const router = express.Router();
 
@@ -236,3 +236,4 @@ router.patch('/deletion-requests/:userId', authMiddleware, async (req, res) => {
     }
 });
 
+module.exports = router;
