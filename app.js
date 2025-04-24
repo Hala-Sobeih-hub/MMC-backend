@@ -10,14 +10,14 @@ const PORT = process.env.PORT || 8080
 app.use(express.json())
 
 
-const dotenv = require('dotenv')
+
 const cors = require('cors')
 const authMiddleware = require('./middleware/authMiddleware.js')
 const userRoutes = require('./routes/user_routes.js')
 
 dotenv.config()
 
-const app = express()
+
 
 // Middleware
 app.use(express.json())
@@ -30,11 +30,19 @@ connectDB()
 
 //* Imports for controllers
 const cartController = require('./controllers/cart-routes.js')
+const testimonialsController = require('./controllers/TestimonialsRoutes.js')
+const productsController = require('./controllers/ProductsRoutes.js')
+
 
 //* Routes
 app.use('/api/cart', cartController)
 app.use(authMiddleware);
+
+app.use('/api/testimonials', require('./controllers/TestimonialsRoutes.js'))
+app.use('/api/products', require('./controllers/ProductsRoutes.js'))
+
 app.use('/api/users', userRoutes);
+
 
 
 app.listen(PORT, () => {
