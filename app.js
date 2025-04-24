@@ -2,6 +2,7 @@ const express = require('express')
 const dotenv = require('dotenv')
 const cors = require('cors')
 const authMiddleware = require('./middleware/authMiddleware.js')
+const userRoutes = require('./routes/user_routes.js')
 
 dotenv.config()
 
@@ -25,3 +26,4 @@ app.listen(PORT, () => {
 
 // Routes
 app.use(authMiddleware);
+app.use('/api/users', userRoutes);
