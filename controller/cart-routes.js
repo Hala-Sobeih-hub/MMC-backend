@@ -1,6 +1,6 @@
 const router = require('express').Router() //Import express and create a new router
 
-const Cart = require('../models/cart') //Import the Cart model
+const Cart = require('../model/cart') //Import the Cart model
 
 //POST - 'localhost:8080/api/cart - create a new cart - Any User
 router.post('/', async (req, res) => {
