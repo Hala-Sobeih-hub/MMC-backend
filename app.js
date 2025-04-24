@@ -7,16 +7,12 @@ require('dotenv').config()
 
 const PORT = process.env.PORT || 8080
 
-app.use(express.json())
-
 const dotenv = require('dotenv')
 const cors = require('cors')
 const authMiddleware = require('./middleware/authMiddleware.js')
 const userRoutes = require('./routes/user_routes.js')
 
 dotenv.config()
-
-const app = express()
 
 // Middleware
 app.use(express.json())
@@ -32,6 +28,7 @@ const bookingController = require('./controllers/booking-routes.js')
 
 //* Routes
 app.use('/api/cart', cartController)
+app.use('/api/booking', bookingController)
 app.use(authMiddleware)
 app.use('/api/users', userRoutes)
 
