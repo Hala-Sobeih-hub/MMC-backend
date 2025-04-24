@@ -14,9 +14,11 @@ connectDB()
 
 //* Imports for controllers
 const cartController = require('./controllers/cart-routes.js')
+const bookingController = require('./controllers/booking-routes.js')
 
 //* Routes
 app.use('/api/cart', cartController)
+app.use('/api/booking', bookingController)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
