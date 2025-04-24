@@ -22,18 +22,18 @@ const connectDB = require('./config/database.js')
 connectDB()
 
 //* Imports for controllers
-const cartController = require('./controller/cart-routes.js')
-const bookingController = require('./controller/booking-routes.js')
-const testimonialsController = require('./controller/TestimonialsRoutes.js')
-const productsController = require('./controller/ProductsRoutes.js')
+const cartController = require('./controllers/cart-routes.js')
+const bookingController = require('./controllers/booking-routes.js')
+const testimonialsController = require('./controllers/TestimonialsRoutes.js')
+const productsController = require('./controllers/ProductsRoutes.js')
 
 //* Routes
 app.use('/api/cart', cartController)
 app.use('/api/booking', bookingController)
 app.use(authMiddleware)
 app.use('/api/users', userRoutes)
-app.use('/api/testimonials', require('./controller/TestimonialsRoutes.js'))
-app.use('/api/products', require('./controller/ProductsRoutes.js'))
+app.use('/api/testimonials', require('./controllers/TestimonialsRoutes.js'))
+app.use('/api/products', require('./controllers/ProductsRoutes.js'))
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)

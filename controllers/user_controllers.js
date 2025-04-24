@@ -1,5 +1,5 @@
 import express from 'express'
-import User from '../model/user.js'
+import User from '../models/user.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import authMiddleware from '../middleware/authMiddleware.js'
@@ -78,11 +78,9 @@ router.post('/login', async (req, res) => {
     })
   } catch (err) {
     console.error('Login Error:', err.message)
-    res
-      .status(500)
-      .json({
-        message: 'An error occurred while logging in. Please try again later.'
-      })
+    res.status(500).json({
+      message: 'An error occurred while logging in. Please try again later.'
+    })
   }
 })
 
@@ -97,11 +95,9 @@ router.delete('/delete/:id', authMiddleware, async (req, res) => {
 
     // Check if the user is an admin or deleting their own account
     if (req.user.id !== id && !req.user.isAdmin) {
-      return res
-        .status(403)
-        .json({
-          message: 'Access denied. You can only delete your own account.'
-        })
+      return res.status(403).json({
+        message: 'Access denied. You can only delete your own account.'
+      })
     }
 
     // Find and delete the user
@@ -113,12 +109,10 @@ router.delete('/delete/:id', authMiddleware, async (req, res) => {
     res.status(200).json({ message: 'User deleted successfully.' })
   } catch (err) {
     console.error('Delete User Error:', err.message)
-    res
-      .status(500)
-      .json({
-        message:
-          'An error occurred while deleting the user. Please try again later.'
-      })
+    res.status(500).json({
+      message:
+        'An error occurred while deleting the user. Please try again later.'
+    })
   }
 })
 
@@ -138,12 +132,9 @@ router.get('/all', authMiddleware, async (req, res) => {
     })
   } catch (err) {
     console.error('Get All Users Error:', err.message)
-    res
-      .status(500)
-      .json({
-        message:
-          'An error occurred while fetching users. Please try again later.'
-      })
+    res.status(500).json({
+      message: 'An error occurred while fetching users. Please try again later.'
+    })
   }
 })
 
@@ -198,12 +189,10 @@ router.post('/request-deletion', authMiddleware, async (req, res) => {
     })
   } catch (err) {
     console.error('Request Deletion Error:', err.message)
-    res
-      .status(500)
-      .json({
-        message:
-          'An error occurred while submitting your deletion request. Please try again later.'
-      })
+    res.status(500).json({
+      message:
+        'An error occurred while submitting your deletion request. Please try again later.'
+    })
   }
 })
 
@@ -223,12 +212,10 @@ router.get('/deletion-requests', authMiddleware, async (req, res) => {
     })
   } catch (err) {
     console.error('Get Deletion Requests Error:', err.message)
-    res
-      .status(500)
-      .json({
-        message:
-          'An error occurred while fetching deletion requests. Please try again later.'
-      })
+    res.status(500).json({
+      message:
+        'An error occurred while fetching deletion requests. Please try again later.'
+    })
   }
 })
 
@@ -257,11 +244,9 @@ router.patch('/deletion-requests/:userId', authMiddleware, async (req, res) => {
       // Delete the user
       await User.findByIdAndDelete(userId)
 
-      res
-        .status(200)
-        .json({
-          message: 'Deletion request approved and user account deleted.'
-        })
+      res.status(200).json({
+        message: 'Deletion request approved and user account deleted.'
+      })
     } else if (action === 'reject') {
       // Update the user's deletionRequest field
       user.deletionRequest = false
@@ -275,11 +260,9 @@ router.patch('/deletion-requests/:userId', authMiddleware, async (req, res) => {
     }
   } catch (err) {
     console.error('Process Deletion Request Error:', err.message)
-    res
-      .status(500)
-      .json({
-        message:
-          'An error occurred while processing the deletion request. Please try again later.'
-      })
+    res.status(500).json({
+      message:
+        'An error occurred while processing the deletion request. Please try again later.'
+    })
   }
 })
