@@ -8,7 +8,7 @@ require('dotenv').config()
 
 const PORT = process.env.PORT || 8080
 
-const authMiddleware = require('./middleware/authMiddleware.js')
+// const authMiddleware = require('./middleware/authMiddleware.js')
 
 dotenv.config()
 
@@ -21,15 +21,16 @@ const connectDB = require('./config/database.js')
 connectDB()
 
 //* Imports for controllers
-const cartController = require('./controller/cart-routes.js')
-const bookingController = require('./controller/booking-routes.js')
-const testimonialsController = require('./controller/TestimonialsRoutes.js')
-const productsController = require('./controller/ProductsRoutes.js')
-const userController = require('./controller/user_controllers.js')
+const cartController = require('./controllers/cart-routes.js')
+const bookingController = require('./controllers/booking-routes.js')
+const testimonialsController = require('./controllers/TestimonialsRoutes.js')
+const productsController = require('./controllers/ProductsRoutes.js')
+const userController = require('./controllers/user_controllers.js')
 
 //* Routes
 app.use('/api/cart', cartController)
-app.use(authMiddleware)
+app.use('/api/booking', bookingController)
+// app.use(authMiddleware)
 
 app.use('/api/testimonials', testimonialsController)
 app.use('/api/products', productsController)

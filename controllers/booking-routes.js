@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
       eventNotes
     } = req.body
 
-    //if any of the fields are missing
+    //if any of the fields are missing, except for eventNotes which is optional
     if (
       !userId ||
       !email ||
@@ -25,7 +25,7 @@ router.post('/', async (req, res) => {
       !rentalDate ||
       !deliveryAddress
     ) {
-      return res.status(401).json({
+      return res.status(400).json({
         message: 'All fields are Required!' // Return a 401 status code and a message
       })
     }
