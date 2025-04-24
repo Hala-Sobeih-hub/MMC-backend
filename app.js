@@ -1,4 +1,11 @@
 const express = require('express')
+
+const mongoose = require('mongoose')
+const dotenv = require('dotenv')
+
+const app = express()
+require('dotenv').config()
+
 const dotenv = require('dotenv')
 const cors = require('cors')
 const authMiddleware = require('./middleware/authMiddleware.js')
@@ -13,6 +20,7 @@ app.use(cors())
 
 
 // Verify environment variables
+
 const PORT = process.env.PORT || 8080
 
 //connect to DB
@@ -23,5 +31,8 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
+
+
 // Routes
 app.use(authMiddleware);
+
