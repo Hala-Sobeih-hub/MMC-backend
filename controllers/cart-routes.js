@@ -1,6 +1,7 @@
 const router = require('express').Router() //Import express and create a new router
 
 const Cart = require('../models/cart') //Import the Cart model
+const Product = require('../models/Products')
 
 //POST - 'localhost:8080/api/cart - create a new cart - Any User
 router.post('/', async (req, res) => {
@@ -40,6 +41,31 @@ router.post('/', async (req, res) => {
   }
 })
 
+//GET all - 'localhost:8080/api/cart/' - display all carts - Admin Only
+router.get('/', async (req, res) => {
+  try {
+    //get All carts from database
+    const carts = await Cart.find()
+
+    if (carts.length === 0) {
+      //no carts are found in the database
+      return res.status(400).json({
+        message: 'No Carts are found!'
+      })
+    }
+    res.status(200).json({
+      //return a 200 status code and the services
+      result: carts,
+      message: 'All carts are retrieved successfully' //return a success message
+    })
+  } catch (error) {
+    //return a 500 status code and an error message
+    res.status(500).json({
+      Error: error.message
+    })
+  }
+})
+
 //GET one - 'localhost:8080/api/cart/:_id' - display one cart by ID - Any User
 router.get('/:_id', async (req, res) => {
   try {
@@ -47,10 +73,11 @@ router.get('/:_id', async (req, res) => {
     const { _id } = req.params
 
     //find the cart by ID in the database
-    const cart = await Cart.findById(_id).populate({
-      path: 'itemsList.productId',
-      select: 'name imageUrl price'
-    })
+    const cart = await Cart.findById(_id)
+    // .populate({
+    //   path: 'itemsList.productId',
+    //   select: 'name imageUrl price'
+    // })
 
     //if no cart matches the given ID
     if (!cart) {
