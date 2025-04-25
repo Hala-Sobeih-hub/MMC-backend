@@ -1,6 +1,7 @@
 const router = require('express').Router() //Import express and create a new router
 
 const Cart = require('../models/cart') //Import the Cart model
+const Product = require('../models/Products')
 
 //POST - 'localhost:8080/api/cart - create a new cart - Any User
 router.post('/', async (req, res) => {
@@ -8,10 +9,10 @@ router.post('/', async (req, res) => {
     //get cart data from the request body
     const { userId, itemsList, deliveryAddress, eventNotes } = req.body
 
-    //if any of the fields are missing
-    if (!userId || !itemsList || !deliveryAddress || !eventNotes) {
-      return res.status(401).json({
-        message: 'All fields are Required!' // Return a 401 status code and a message
+    //if any of the fields are missing (except for eventNotes which is optional)
+    if (!userId || !itemsList || !deliveryAddress) {
+      return res.status(400).json({
+        message: 'All fields are Required!' // Return a 400 status code and a message
       })
     }
 
@@ -40,6 +41,31 @@ router.post('/', async (req, res) => {
   }
 })
 
+//GET all - 'localhost:8080/api/cart/' - display all carts - Admin Only
+router.get('/', async (req, res) => {
+  try {
+    //get All carts from database
+    const carts = await Cart.find()
+
+    if (carts.length === 0) {
+      //no carts are found in the database
+      return res.status(400).json({
+        message: 'No Carts are found!'
+      })
+    }
+    res.status(200).json({
+      //return a 200 status code and the services
+      result: carts,
+      message: 'All carts are retrieved successfully' //return a success message
+    })
+  } catch (error) {
+    //return a 500 status code and an error message
+    res.status(500).json({
+      Error: error.message
+    })
+  }
+})
+
 //GET one - 'localhost:8080/api/cart/:_id' - display one cart by ID - Any User
 router.get('/:_id', async (req, res) => {
   try {
@@ -48,6 +74,10 @@ router.get('/:_id', async (req, res) => {
 
     //find the cart by ID in the database
     const cart = await Cart.findById(_id)
+    // .populate({
+    //   path: 'itemsList.productId',
+    //   select: 'name imageUrl price'
+    // })
 
     //if no cart matches the given ID
     if (!cart) {
@@ -81,8 +111,12 @@ router.put('/:_id', async (req, res) => {
 
     const updatedCart = { itemsList, deliveryAddress, eventNotes }
 
+    //options: (Optional) An object specifying options such as new
+    //new: If set to true, returns the modified document rather than the original. Defaults to false.
+    const options = { new: true }
+
     //find the cart and update its fields
-    await Cart.findByIdAndUpdate(_id, updatedCart)
+    await Cart.findByIdAndUpdate(_id, updatedCart, options)
 
     //return the successful message
     res.status(200).json({
@@ -105,6 +139,13 @@ router.delete('/:_id', async (req, res) => {
 
     //find the cart by ID to be deleted.
     const deletedCart = await Cart.findByIdAndDelete(_id)
+
+    //if no cart was found by that ID
+    if (!deletedCart) {
+      return res.status(404).json({
+        message: 'Cart not found. It may have already been deleted or expired.'
+      })
+    }
 
     //send successful response
     res.status(200).json({

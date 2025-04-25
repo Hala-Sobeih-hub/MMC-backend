@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
       eventNotes
     } = req.body
 
-    //if any of the fields are missing
+    //if any of the fields are missing, except for eventNotes which is optional
     if (
       !userId ||
       !email ||
@@ -25,8 +25,8 @@ router.post('/', async (req, res) => {
       !rentalDate ||
       !deliveryAddress
     ) {
-      return res.status(401).json({
-        message: 'All fields are Required!' // Return a 401 status code and a message
+      return res.status(400).json({
+        message: 'Missing required fields. Please fill in all required fields.' // Return a 401 status code and a message
       })
     }
 
@@ -66,6 +66,14 @@ router.get('/:_id', async (req, res) => {
 
     //find the booking by ID in the database
     const booking = await Booking.findById(_id)
+    // .populate({
+    //   path: 'itemsList.productId',
+    //   select: 'name imageUrl price'
+    // })
+    // .populate({
+    //   path: 'userId',
+    //   select: 'firstName lastName email phoneNumber'
+    // })
 
     //if no booking matches the given ID
     if (!booking) {
