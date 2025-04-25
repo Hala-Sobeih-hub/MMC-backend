@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 // User Schema
 const userSchema = new mongoose.Schema({
@@ -29,9 +29,6 @@ const userSchema = new mongoose.Schema({
     phoneNumber: {
         type: String, required: true
     },
-    eventNotes: {
-        type: String, required: true
-    },
     isAdmin: {
         type: Boolean, default: false
     },
@@ -40,4 +37,4 @@ const userSchema = new mongoose.Schema({
     timestamps: true // Automatically add createdAt and updatedAt timestamps 
 });
 
-export default mongoose.model('User', userSchema);
+module.exports = mongoose.model('User', userSchema);

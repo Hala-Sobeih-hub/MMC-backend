@@ -8,7 +8,7 @@ const router = express.Router()
 
 router.post('/signup', async (req, res) => {
     try {
-        const { firstName, lastName, email, password } = req.body;
+        const { firstName, lastName, email, username, password, deliveryAddress, phoneNumber } = req.body;
 
         const passwordhashed = bcrypt.hashSync(password, +process.env.SALT);
 
@@ -16,13 +16,19 @@ router.post('/signup', async (req, res) => {
             firstName: firstName,
             lastName: lastName,
             email: email,
+            username: username,
             password: passwordhashed,
+            deliveryAddress: deliveryAddress,
+            phoneNumber: phoneNumber,
         });
 
-        // Assign a token
+        await newUser.save();
+
+        // // Assign a token
         const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-            expiresIn: "1d",
+            expiresIn: "1w",
         });
+        console.log(token);
 
         res.status(200).json({
             Msg: 'Success! Account was created!',
@@ -30,6 +36,7 @@ router.post('/signup', async (req, res) => {
             Token: token,
         });
     } catch (err) {
+        // console.log(err);
         if (err.code === 11000) {
             return res.status(400).json({
                 Error: 'User already exists. Try logging in.',
@@ -44,10 +51,10 @@ router.post('/signup', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { username, password } = req.body;
 
         // Find the user by email
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ username });
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
@@ -60,7 +67,7 @@ router.post('/login', async (req, res) => {
 
         // Generate a JWT token
         const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET, {
-            expiresIn: '1d',
+            expiresIn: '1w',
         });
 
         // Exclude sensitive fields from the response
@@ -74,6 +81,42 @@ router.post('/login', async (req, res) => {
     } catch (err) {
         console.error('Login Error:', err.message);
         res.status(500).json({ message: 'An error occurred while logging in. Please try again later.' });
+    }
+});
+
+// User changes their password
+router.patch('/change-password', authMiddleware, async (req, res) => {
+    try {
+        const { email, currentPassword, newPassword } = req.body;
+
+        // Validate input
+        if (!email || !currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Please provide email, current password, and new password.' });
+        }
+
+        // Find the user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Verify the current password
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Current password is incorrect.' });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, +process.env.SALT);
+
+        // Update the user's password
+        user.password = hashedPassword;
+        await user.save();
+
+        res.status(200).json({ message: 'Password updated successfully.' });
+    } catch (err) {
+        console.error('Change Password Error:', err.message);
+        res.status(500).json({ message: 'An error occurred while changing the password. Please try again later.' });
     }
 });
 
@@ -196,6 +239,8 @@ router.get('/deletion-requests', authMiddleware, async (req, res) => {
         res.status(500).json({ message: 'An error occurred while fetching deletion requests. Please try again later.' });
     }
 });
+
+
 
 // Admin approves or rejects a deletion request
 router.patch('/deletion-requests/:userId', authMiddleware, async (req, res) => {
