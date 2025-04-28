@@ -1,17 +1,15 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const dotenv = require('dotenv')
+const cors = require('cors')
+
 
 const app = express()
 require('dotenv').config()
 
 const PORT = process.env.PORT || 8080
 
-const cors = require('cors')
-const authMiddleware = require('./middleware/authMiddleware.js')
 
-
-dotenv.config()
 
 // Middleware
 app.use(express.json())
@@ -29,9 +27,9 @@ const productsController = require('./controllers/ProductsRoutes.js')
 const userController = require('./controllers/user_controllers.js')
 
 //* Routes
+// app.use(authMiddleware); 
+app.use('/api/booking', bookingController)
 app.use('/api/cart', cartController)
-app.use(authMiddleware);
-
 app.use('/api/testimonials', testimonialsController)
 app.use('/api/products', productsController)
 

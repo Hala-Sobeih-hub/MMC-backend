@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Products = require('../models/Products.js')
-
+const { isAdmin } = require('../middleware/authMiddleware.js')
 router.get('/', async (req, res) => {
     try {
         const products = await Products.find()
@@ -25,7 +25,7 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' })
     }
 })
-router.post('/create', isAdmin, async (req, res) => {
+router.post('/', isAdmin, async (req, res) => {
     try {
         const { name, description, price, imageUrl, available, availableDate } =
             req.body
