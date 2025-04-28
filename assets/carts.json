@@ -1,0 +1,73 @@
+[
+  {
+    "userId": "661fb1d2fbcf8b2a45d1a2d3",
+    "itemsList": [
+      {
+        "productId": "661fb21afbcf8b2a45d1a2d8",
+        "quantity": 2,
+        "price": 25.0
+      },
+      {
+        "productId": "661fb230fbcf8b2a45d1a2db",
+        "quantity": 1,
+        "price": 15.0
+      }
+    ],
+    "deliveryAddress": "123 Fun Lane, Partyville, TX 78201",
+    "eventNotes": "Please deliver before 10 AM."
+  },
+
+  {
+    "userId": "661fb1d2fbcf8b2a45d1a2d3",
+    "itemsList": [
+      {
+        "productId": "661fb230fbcf8b2a45d1a2db",
+        "quantity": 1,
+        "price": 45.0
+      },
+      {
+        "productId": "661fb241fbcf8b2a45d1a2de",
+        "quantity": 2,
+        "price": 7.5
+      }
+    ],
+    "deliveryAddress": "456 Bounce Blvd, Fiesta Town, TX 78202",
+    "eventNotes": "Set up in the backyard near the pool."
+  },
+
+  {
+    "userId": "661fb1f3fbcf8b2a45d1a2d5",
+    "itemsList": [
+      {
+        "productId": "661fb250fbcf8b2a45d1a2e1",
+        "quantity": 3,
+        "price": 20.0
+      },
+      {
+        "productId": "661fb263fbcf8b2a45d1a2e4",
+        "quantity": 10,
+        "price": 2.5
+      }
+    ],
+    "deliveryAddress": "789 Festival Ave, San Antonio, TX 78203",
+    "eventNotes": "Deliver to the school gym entrance."
+  },
+
+  {
+    "userId": "661fb210fbcf8b2a45d1a2d7",
+    "itemsList": [
+      {
+        "productId": "661fb276fbcf8b2a45d1a2e7",
+        "quantity": 1,
+        "price": 60.0
+      },
+      {
+        "productId": "661fb288fbcf8b2a45d1a2ea",
+        "quantity": 6,
+        "price": 5.0
+      }
+    ],
+    "deliveryAddress": "101 Happy Ln, Celebration City, TX 78204",
+    "eventNotes": "It’s for a birthday. Please add balloons if possible!"
+  }
+]
