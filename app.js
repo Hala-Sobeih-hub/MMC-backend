@@ -8,6 +8,7 @@ require('dotenv').config()
 
 const PORT = process.env.PORT || 8080
 
+
 // const authMiddleware = require('./middleware/authMiddleware.js')
 
 dotenv.config()
@@ -28,6 +29,8 @@ const productsController = require('./controllers/ProductsRoutes.js')
 const userController = require('./controllers/user_controllers.js')
 
 //* Routes
+// app.use(authMiddleware); 
+app.use('/api/booking', bookingController)
 app.use('/api/cart', cartController)
 app.use('/api/users', userController);
 // app.use(authMiddleware);
