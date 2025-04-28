@@ -1,7 +1,12 @@
 const express = require('express')
 const router = express.Router()
 const Products = require('../models/Products.js')
+<<<<<<< HEAD:Controllers/ProductsRoutes.js
 const { isAdmin } = require('../middleware/authMiddleware.js')
+=======
+
+const isAdmin = require('../middleware/authMiddleware.js')
+>>>>>>> 0591185ebe94aaa16881c033f8f39747a6b0b381:controllers/ProductsRoutes.js
 router.get('/', async (req, res) => {
     try {
         const products = await Products.find()
@@ -92,4 +97,4 @@ router.delete('/:id', isAdmin, async (req, res) => {
     }
 })
 
-module.exports = router;
+module.exports = router
