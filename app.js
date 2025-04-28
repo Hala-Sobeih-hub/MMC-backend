@@ -29,13 +29,15 @@ const userController = require('./controllers/user_controllers.js')
 
 //* Routes
 app.use('/api/cart', cartController)
-app.use('/api/booking', bookingController)
-// app.use(authMiddleware)
+app.use('/api/users', userController);
+// app.use(authMiddleware);
 
 app.use('/api/testimonials', testimonialsController)
 app.use('/api/products', productsController)
+app.use('/api/booking', bookingController)
 
-app.use('/api/users', userController)
+
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
