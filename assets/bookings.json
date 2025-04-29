@@ -1,0 +1,82 @@
+[
+  {
+    "userId": "6631bc9652f6f9a2d8bb12a1",
+    "email": "johndoe@example.com",
+    "itemsList": [
+      {
+        "productId": "6631bd4252f6f9a2d8bb12a5",
+        "quantity": 2,
+        "price": 150
+      }
+    ],
+    "totalPrice": 300,
+    "rentalDate": "2025-05-20T00:00:00.000Z",
+    "deliveryAddress": "1234 Main St, Springfield, TX",
+    "eventNotes": "Please deliver by 8 AM."
+  },
+  {
+    "userId": "6631bc9652f6f9a2d8bb12a2",
+    "email": "janedoe@example.com",
+    "itemsList": [
+      {
+        "productId": "6631bd4252f6f9a2d8bb12a6",
+        "quantity": 1,
+        "price": 250
+      },
+      {
+        "productId": "6631bd4252f6f9a2d8bb12a7",
+        "quantity": 4,
+        "price": 20
+      }
+    ],
+    "totalPrice": 330,
+    "rentalDate": "2025-05-25T00:00:00.000Z",
+    "deliveryAddress": "5678 Market St, Houston, TX",
+    "eventNotes": "We have a parking lot available."
+  },
+  {
+    "userId": "6631bc9652f6f9a2d8bb12a3",
+    "email": "michael.smith@example.com",
+    "itemsList": [
+      {
+        "productId": "6631bd4252f6f9a2d8bb12a8",
+        "quantity": 3,
+        "price": 100
+      }
+    ],
+    "totalPrice": 300,
+    "rentalDate": "2025-06-01T00:00:00.000Z",
+    "deliveryAddress": "7890 River Rd, Dallas, TX",
+    "eventNotes": "Set up near the backyard."
+  },
+  {
+    "userId": "6631bc9652f6f9a2d8bb12a4",
+    "email": "sarah.connor@example.com",
+    "itemsList": [
+      {
+        "productId": "6631bd4252f6f9a2d8bb12a9",
+        "quantity": 2,
+        "price": 400
+      }
+    ],
+    "totalPrice": 800,
+    "rentalDate": "2025-06-10T00:00:00.000Z",
+    "deliveryAddress": "2468 Sunset Blvd, Austin, TX",
+    "eventNotes": "Make sure everything is clean."
+  },
+  {
+    "userId": "6631bc9652f6f9a2d8bb12a5",
+    "email": "tom.brady@example.com",
+    "itemsList": [
+      {
+        "productId": "6631bd4252f6f9a2d8bb12aa",
+        "quantity": 5,
+        "price": 75
+      }
+    ],
+    "totalPrice": 375,
+    "rentalDate": "2025-06-15T00:00:00.000Z",
+    "deliveryAddress": "1357 Liberty Ln, San Antonio, TX",
+    "eventNotes": "Bring extension cords if possible."
+  }
+]
