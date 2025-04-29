@@ -4,8 +4,8 @@ const Testimonials = require('../models/Testimonials.js')
 
 router.get('/', async (req, res) => {
   try {
-    const Testimonials = await Testimonials.find() // Fetch all testimonials from the database
-    res.status(200).json(Testimonials) // Send the testimonials as a JSON response
+    const testimonials = await Testimonials.find() // Fetch all testimonials from the database
+    res.status(200).json(testimonials) // Send the testimonials as a JSON response
   } catch (error) {
     console.error('Error fetching testimonials:', error) // Log any errors that occur
     res.status(500).json({ message: 'Internal server error' }) // Send a 500 status with an error message
@@ -14,8 +14,8 @@ router.get('/', async (req, res) => {
 
 router.post('/create', async (req, res) => {
   try {
-    const { userId, name, reviews, rating } = req.body // Destructure the request body to get testimonial data
-
+     const { userId, name, reviews, rating } = req.body // Destructure the request body to get testimonial data
+    console.log('Received testimonial data:', req.body) // Log the received data for debugging
     if (!userId || !name || !reviews || !rating) {
       // Check if all required fields are provided
       return res.status(400).json({ message: 'All fields are required' }) // Send a 400 status with an error message
@@ -28,6 +28,7 @@ router.post('/create', async (req, res) => {
       reviews,
       rating
     })
+    
 
     // Save the testimonial to the database
     const savedTestimonial = await newTestimonial.save()
