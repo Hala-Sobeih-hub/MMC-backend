@@ -4,9 +4,9 @@ const ProductsSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         description: { type: String, required: true },
-        price: { type: Number, required: true },
+        price: { type: Number, type: String, required: true },
         imageUrl: { type: String, required: true },
-        addedUsers: [{ type: String }],
+
         available: { type: Boolean, default: true }, // Indicates if the product is available
         
         // The date when the product will be available for purchase    
