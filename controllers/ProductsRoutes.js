@@ -26,7 +26,7 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' })
     }
 })
- router.post('/',/* isAdmin,*/ async (req, res) => {
+ router.post('/', isAdmin, async (req, res) => {
     try {
         const { name, description, price, imageUrl, available, availableDate } =
             req.body
@@ -58,7 +58,7 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-router.put('/:id',/* isAdmin,*/ async (req, res) => {
+router.put('/:id', isAdmin, async (req, res) => {
     try {
         const { name, description, price, imageUrl, available, availableDate } =
             req.body
@@ -80,7 +80,7 @@ router.put('/:id',/* isAdmin,*/ async (req, res) => {
     }
 })
 
-router.delete('/:id', /*isAdmin,*/ async (req, res) => {
+router.delete('/:id', isAdmin, async (req, res) => {
     try {
         const deletedProduct = await Products.findByIdAndDelete(req.params.id)
 
