@@ -24,7 +24,7 @@ const authMiddleware = async (req, res, next) => {
       if (!req.user) {
         return res.status(401).json({ message: 'Unauthorized, user not found' })
       }
-
+      req.user = { id: user._id }
       next()
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
