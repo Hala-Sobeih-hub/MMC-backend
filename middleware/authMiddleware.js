@@ -29,10 +29,11 @@ const authMiddleware = async (req, res, next) => {
       if (!user) {
         return res.status(401).json({ message: 'Unauthorized, user not found' })
       }
-
-      // Attach decoded user data to request
-      req.user = user
+      
+      
+     req.user = user
       //req.user = { id: user._id } // just attach the userId as 'id'
+
 
       next()
     } catch (error) {
