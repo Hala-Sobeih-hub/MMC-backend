@@ -3,7 +3,6 @@ const mongoose = require('mongoose')
 
 const Booking = require('../models/booking') //Import the Booking model
 const authMiddleware = require('../middleware/authMiddleware.js') // Import the authentication middleware
-const adminMiddleware = require('../middleware/adminMiddleware.js')
 
 //POST - 'localhost:8080/api/booking - create a new booking - Logged in User
 router.post('/', authMiddleware, async (req, res) => {
@@ -179,35 +178,40 @@ router.get('/:_id', authMiddleware, async (req, res) => {
 router.get(
   '/user/:userId',
   authMiddleware,
-  adminMiddleware,
+
   async (req, res) => {
     try {
-      //get the userId from request params
-      const { userId } = req.params
+      if (req.user.isAdmin) {
+        //get the userId from request params
+        const { userId } = req.params
 
-      const bookings = await Booking.find({ userId })
-        .sort({ createdAt: -1 })
-        .populate({
-          path: 'userId',
-          select: 'firstName lastName email phoneNumber'
-        })
-        .populate({
-          path: 'itemsList.productId',
-          select: 'name imageUrl price'
-        })
+        const bookings = await Booking.find({ userId })
+          .sort({ createdAt: -1 })
+          .populate({
+            path: 'userId',
+            select: 'firstName lastName email phoneNumber'
+          })
+          .populate({
+            path: 'itemsList.productId',
+            select: 'name imageUrl price'
+          })
 
-      //if no bookings were found
-      if (bookings.length === 0) {
-        res.status(404).json({
-          message: 'No Bookings were found for this user!'
+        //if no bookings were found
+        if (bookings.length === 0) {
+          res.status(404).json({
+            message: 'No Bookings were found for this user!'
+          })
+        }
+
+        res.status(200).json({
+          //return a success message
+          result: bookings,
+          message: 'All Bookings are retrieved successfuly!'
         })
+      } else {
+        // if the user is not an admin
+        return res.status(403).json({ error: 'Access denied. Admins only.' })
       }
-
-      res.status(200).json({
-        //return a success message
-        result: bookings,
-        message: 'All Bookings are retrieved successfuly!'
-      })
     } catch (error) {
       //return a 500 stats code and an error message
       res.status(500).json({
@@ -218,101 +222,124 @@ router.get(
 )
 
 //GET All - 'localhost:8080/api/booking' - display All bookings from all users - Admin Only
-router.get('/', authMiddleware, adminMiddleware, async (req, res) => {
-  try {
-    const bookings = await Booking.find()
-      .populate({
-        path: 'userId',
-        select: 'firstName lastName email phoneNumber'
-      })
-      .populate({
-        path: 'itemsList.productId',
-        select: 'name imageUrl price'
-      })
+router.get(
+  '/',
+  authMiddleware,
 
-    //if no bookings were found
-    if (bookings.length === 0) {
-      res.status(404).json({
-        message: 'No Bookings were found for this user!'
+  async (req, res) => {
+    try {
+      if (req.user.isAdmin) {
+        const bookings = await Booking.find()
+          .populate({
+            path: 'userId',
+            select: 'firstName lastName email phoneNumber'
+          })
+          .populate({
+            path: 'itemsList.productId',
+            select: 'name imageUrl price'
+          })
+
+        //if no bookings were found
+        if (bookings.length === 0) {
+          res.status(404).json({
+            message: 'No Bookings were found for this user!'
+          })
+        }
+
+        res.status(200).json({
+          //return a success message
+          result: bookings,
+          message: 'All Bookings are retrieved successfuly!'
+        })
+      } else {
+        // if the user is not an admin
+        return res.status(403).json({ error: 'Access denied. Admins only.' })
+      }
+    } catch (error) {
+      //return a 500 stats code and an error message
+      res.status(500).json({
+        Error: `${error.message}`
       })
     }
-
-    res.status(200).json({
-      //return a success message
-      result: bookings,
-      message: 'All Bookings are retrieved successfuly!'
-    })
-  } catch (error) {
-    //return a 500 stats code and an error message
-    res.status(500).json({
-      Error: `${error.message}`
-    })
   }
-})
+)
 
-// TODO: uncomment authMiddleware and adminMiddleware,
-//----------------------------------
 //PUT one- 'localhost:8080/api/booking/:_id - update one booking by ID - Admin Only
-router.put('/:_id', authMiddleware, adminMiddleware, async (req, res) => {
-  try {
-    //get the booking ID from request params
-    const { _id } = req.params
+router.put(
+  '/:_id',
+  authMiddleware,
 
-    //get the updated fields (updated status) from the request body
-    const { status } = req.body
+  async (req, res) => {
+    try {
+      if (req.user.isAdmin) {
+        //get the booking ID from request params
+        const { _id } = req.params
 
-    const bookingToBeUpdated = { status }
+        //get the updated fields (updated status) from the request body
+        const { status } = req.body
 
-    //options: (Optional) An object specifying options such as new
-    //new: If set to true, returns the modified document rather than the original. Defaults to false.
-    const options = { new: true }
+        const bookingToBeUpdated = { status }
 
-    //find the booking and update its fields
-    const updatedBooking = await Booking.findByIdAndUpdate(
-      _id,
-      bookingToBeUpdated,
-      options
-    )
+        //options: (Optional) An object specifying options such as new
+        //new: If set to true, returns the modified document rather than the original. Defaults to false.
+        const options = { new: true }
 
-    //if no booking was found
-    if (!updatedBooking) {
-      res.status(404).json({
-        message: 'Booking was not found!'
+        //find the booking and update its fields
+        const updatedBooking = await Booking.findByIdAndUpdate(
+          _id,
+          bookingToBeUpdated,
+          options
+        )
+
+        //if no booking was found
+        if (!updatedBooking) {
+          res.status(404).json({
+            message: 'Booking was not found!'
+          })
+        }
+        //return the successful message
+        res.status(200).json({
+          result: updatedBooking,
+          message: 'Booking was updated!'
+        })
+      } else {
+        // if the user is not an admin
+        return res.status(403).json({ error: 'Access denied. Admins only.' })
+      }
+    } catch (error) {
+      //return a 500 stats code and an error message
+      res.status(500).json({
+        Error: `${error.message}`
       })
     }
-    //return the successful message
-    res.status(200).json({
-      result: updatedBooking,
-      message: 'Booking was updated!'
-    })
-  } catch (error) {
-    //return a 500 stats code and an error message
-    res.status(500).json({
-      Error: `${error.message}`
-    })
   }
-})
+)
 
 //Delete one - 'localhost:8080/api/booking/:_id' - delete one booking by ID - Admin Only
 router.delete('/:_id', authMiddleware, async (req, res) => {
   try {
-    //get the booking ID from request params
-    const { _id } = req.params
+    if (req.user.isAdmin) {
+      //get the booking ID from request params
+      const { _id } = req.params
 
-    //find the booking by ID to be deleted.
-    const deletedBooking = await Booking.findByIdAndDelete(_id)
+      //find the booking by ID to be deleted.
+      const deletedBooking = await Booking.findByIdAndDelete(_id)
 
-    //if no booking was found
-    if (!deletedBooking) {
-      res.status(404).json({
-        message: 'Booking was not found!'
+      //if no booking was found
+      if (!deletedBooking) {
+        res.status(404).json({
+          message: 'Booking was not found!'
+        })
+      }
+      //send successful response
+      res.status(200).json({
+        result: deletedBooking,
+        message: 'Booking was deleted!'
       })
+    } else {
+      // if the user is not an admin
+      return res.status(403).json({ error: 'Access denied. Admins only.' })
     }
-    //send successful response
-    res.status(200).json({
-      result: deletedBooking,
-      message: 'Booking was deleted!'
-    })
   } catch (error) {
     //return a 500 stats code and an error message
     res.status(500).json({
