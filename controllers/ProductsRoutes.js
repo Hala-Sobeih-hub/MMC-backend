@@ -33,14 +33,9 @@ router.get('/:id', async (req, res) => {
 
             if(req.user.isAdmin){
 
-            } else {
-                    // if the user is not an admin
-                    return res.status(403).json({ error: 'Access denied. Admins only.' })
-                  }
 
 
-
-        const { name, description, price, imageUrl, available, availableDate } =
+        const { name, description, price, imageUrl, available, availableDate, onSale, salePrice } =
             req.body
 
         if (!name || !description || !price || !imageUrl) {
@@ -64,6 +59,13 @@ router.get('/:id', async (req, res) => {
 
         // Respond with the created product
         res.status(201).json(savedProduct)
+
+    } else {
+        // if the user is not an admin
+        return res.status(403).json({ error: 'Access denied. Admins only.' })
+      }
+
+
     } catch (error) {
         console.error('Error creating product:', error)
        
@@ -76,17 +78,13 @@ router.put('/:id', authMiddleware, async (req, res) => {
 
         if(req.user.isAdmin){
 
-        } else {
-                // if the user is not an admin
-                return res.status(403).json({ error: 'Access denied. Admins only.' })
-              }
 
         const { name, description, price, imageUrl, available, availableDate } =
             req.body
 
         const updatedProduct = await Products.findByIdAndUpdate(
             req.params.id,
-            { name, description, price, imageUrl, available, availableDate },
+            { name, description, price, imageUrl, available, availableDate, onSale, salePrice },
             { new: true }
         )
 
@@ -95,10 +93,14 @@ router.put('/:id', authMiddleware, async (req, res) => {
         }
 
         res.status(200).json(updatedProduct)
-    } catch (error) {
-        console.error('Error updating product:', error)
-        res.status(500).json({ message: 'Internal server error' })
-    }
+} else {
+    // if the user is not an admin
+    return res.status(403).json({ error: 'Access denied. Admins only.' })
+}
+} catch (error) {
+    console.error('Error updating product:', error)
+    res.status(500).json({ message: 'Internal server error' })
+}
 })
 
 router.delete('/:id', authMiddleware, async (req, res) => {
@@ -106,10 +108,6 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 
         if(req.user.isAdmin){
 
-        } else {
-                // if the user is not an admin
-                return res.status(403).json({ error: 'Access denied. Admins only.' })
-              }
 
 
         const deletedProduct = await Products.findByIdAndDelete(req.params.id)
@@ -119,6 +117,12 @@ router.delete('/:id', authMiddleware, async (req, res) => {
         }
 
         res.status(200).json({ message: 'Product deleted successfully' })
+
+    } else {
+        // if the user is not an admin
+        return res.status(403).json({ error: 'Access denied. Admins only.' })
+      }
+
     } catch (error) {
         console.error('Error deleting product:', error)
         res.status(500).json({ message: 'Internal server error' })
