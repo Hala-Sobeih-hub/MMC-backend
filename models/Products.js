@@ -16,12 +16,26 @@ const ProductsSchema = new mongoose.Schema(
                 validator: function (value) {
                     const now = new Date(); 
                     const maxDate = new Date();
-                    maxDate.setDate(now.getDate() + 60); // 60 days from now
+                    maxDate.setDate(now.getDate() + 120); // 120 days from now
                     return value >= now && value <= maxDate;
                 },
-                message: 'Available date must be between now and 60 days from now.'
+                message: 'Available date must be between now and 120 days from now.'
+            },
+        },
+
+        //Sale-related fields
+    onSale: { type: Boolean, default: false },
+        salePrice: { type: Number, 
+            validate: {
+                validator: function (value) {
+                    // Ensure salePrice is less than the original price
+                    return value < this.price;
+                },
+                message: 'Sale price must be less than the original price.'
             }
+
         }
+
     },
     { timestamps: true }
 );
