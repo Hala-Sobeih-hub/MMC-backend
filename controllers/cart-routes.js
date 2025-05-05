@@ -3,7 +3,6 @@ const router = require('express').Router() //Import express and create a new rou
 const Cart = require('../models/cart') //Import the Cart model
 const Product = require('../models/Products')
 const authMiddleware = require('../middleware/authMiddleware.js') // Import the authentication middleware
-const adminMiddleware = require('../middleware/adminMiddleware.js')
 
 //POST - 'localhost:8080/api/cart - create a new cart - Logged in User
 router.post('/', authMiddleware, async (req, res) => {
@@ -44,31 +43,36 @@ router.post('/', authMiddleware, async (req, res) => {
 })
 
 //GET all - 'localhost:8080/api/cart/' - display all carts - Admin Only
-router.get('/', authMiddleware, adminMiddleware, async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
-    //get All carts from database
-    const carts = await Cart.find()
-      .sort({ createdAt: -1 })
-      .populate({
-        path: 'userId',
-        select: 'firstName lastName email phoneNumber'
-      })
-      .populate({
-        path: 'itemsList.productId',
-        select: 'name imageUrl price'
-      })
+    if (req.user.isAdmin) {
+      //get All carts from database
+      const carts = await Cart.find()
+        .sort({ createdAt: -1 })
+        .populate({
+          path: 'userId',
+          select: 'firstName lastName email phoneNumber'
+        })
+        .populate({
+          path: 'itemsList.productId',
+          select: 'name imageUrl price'
+        })
 
-    if (carts.length === 0) {
-      //no carts are found in the database
-      return res.status(400).json({
-        message: 'No Carts are found!'
+      if (carts.length === 0) {
+        //no carts are found in the database
+        return res.status(400).json({
+          message: 'No Carts are found!'
+        })
+      }
+      res.status(200).json({
+        //return a 200 status code and the carts
+        result: carts,
+        message: 'All carts are retrieved successfully' //return a success message
       })
+    } else {
+      // if the user is not an admin
+      return res.status(403).json({ error: 'Access denied. Admins only.' })
     }
-    res.status(200).json({
-      //return a 200 status code and the carts
-      result: carts,
-      message: 'All carts are retrieved successfully' //return a success message
-    })
   } catch (error) {
     //return a 500 status code and an error message
     res.status(500).json({
