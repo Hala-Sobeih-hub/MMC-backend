@@ -1,0 +1,30 @@
+[
+  {
+    "title": "4th of July Sale!",
+    "message": "Celebrate with us! Get 20% off all inflatable rentals from July 1st–4th. Book now!",
+    "imageUrl": "https://res.cloudinary.com/demo/image/upload/v1714321234/july-sale-banner.jpg",
+    "isActive": true,
+    "createdBy": "6810032d3de64f62a28502ba"
+  },
+  {
+    "title": "Summer Splash Discount!",
+    "message": "Beat the heat with our summer inflatable rentals! Book now and get 15% off all water slides for the month of June.",
+    "imageUrl": "https://example.com/images/summer-sale.jpg",
+    "isActive": false,
+    "createdBy": "6810032d3de64f62a28502ba"
+  },
+  {
+    "title": "Backyard Bash Special",
+    "message": "Host the perfect backyard party with our bounce houses! Free delivery for local bookings this weekend only.",
+    "imageUrl": "https://example.com/images/backyard-bash.jpg",
+    "isActive": false,
+    "createdBy": "6810032d3de64f62a28502ba"
+  },
+  {
+    "title": "Labor Day Weekend Blowout!",
+    "message": "Celebrate Labor Day with family fun! Enjoy 10% off all bounce house rentals and free setup all weekend long.",
+    "imageUrl": "https://example.com/images/labor-day-sale.jpg",
+    "isActive": false,
+    "createdBy": "6810032d3de64f62a28502ba"
+  }
+]
