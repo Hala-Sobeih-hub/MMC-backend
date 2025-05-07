@@ -8,7 +8,6 @@ require('dotenv').config()
 
 const PORT = process.env.PORT || 8080
 
-
 // const authMiddleware = require('./middleware/authMiddleware.js')
 
 dotenv.config()
@@ -27,20 +26,18 @@ const bookingController = require('./controllers/booking-routes.js')
 const testimonialsController = require('./controllers/TestimonialsRoutes.js')
 const productsController = require('./controllers/ProductsRoutes.js')
 const userController = require('./controllers/user_controllers.js')
+const promotionController = require('./controllers/promotion-routes.js')
 
 //* Routes
-// app.use(authMiddleware); 
+// app.use(authMiddleware);
 app.use('/api/booking', bookingController)
 app.use('/api/cart', cartController)
-app.use('/api/users', userController);
+app.use('/api/users', userController)
 // app.use(authMiddleware);
 
 app.use('/api/testimonials', testimonialsController)
 app.use('/api/products', productsController)
-app.use('/api/booking', bookingController)
-
-
-
+app.use('/api/promotion', promotionController)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
