@@ -18,32 +18,6 @@ const app = express()
 
 const PORT = process.env.PORT || 8080
 
-<<<<<<< HEAD
-// app.get("/send-email", (req, res) => {
-//   try {
-//     const mailOptions = {
-//       from: process.env.EMAIL_USER,
-//       to: "kcobas1994@gmail.com", subject: "Test Email", text: "This is a test email sent from Node.js using Nodemailer."
-//     };
-//     transporter.sendMail(mailOptions, (error, info) => {
-//       if (error) {
-//         console.log("Error sending email:", error);
-//         res.status(500).send("Error sending email");
-//       } else {
-//         console.log("Email sent:", info.response);
-//         res.status(200).send("Email sent successfully");
-//       }
-//     })
-//   } catch (error) {
-//     console.error("Error:", error);
-//     res.status(500).send("Internal server error");
-//   }
-// })
-
-
-
-=======
->>>>>>> cce5dc1d8163fc4bcf85ecb2ed0b72dff167cdf0
 // const authMiddleware = require('./middleware/authMiddleware.js')
 
 

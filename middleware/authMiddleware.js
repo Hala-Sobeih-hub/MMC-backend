@@ -33,11 +33,6 @@ const authMiddleware = async (req, res, next) => {
       req.user = user
       //req.user = { id: user._id } // just attach the userId as 'id'
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> cce5dc1d8163fc4bcf85ecb2ed0b72dff167cdf0
       next()
     } catch (error) {
       if (error.name === 'TokenExpiredError') {

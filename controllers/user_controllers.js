@@ -6,8 +6,7 @@ const authMiddleware = require('../middleware/authMiddleware.js') // Import the 
 const isAdmin = require('../middleware/adminMiddleware.js')
 const dotenv = require('dotenv') // Import dotenv for environment variables
 const nodemailer = require('nodemailer') // Import nodemailer for sending emails
-const twilio = require('twilio') // Import Twilio for sending SMS
-const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN) // Initialize Twilio client
+
 
 const router = express.Router()
 
@@ -94,15 +93,15 @@ router.post('/password/forgot', async (req, res) => {
     try {
         console.log('Request Body:', req.body); // Log the request body
 
-        const { email, phoneNumber } = req.body;
+        const { email } = req.body;
 
         // Validate input
-        if (!email && !phoneNumber) {
-            return res.status(400).json({ message: 'Email or phone number is required.' });
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required.' });
         }
 
         // Find the user by email or phone number
-        const user = await User.findOne({ $or: [{ email }, { phoneNumber }] });
+        const user = await User.findOne({ $or: [{ email }] });
         if (!user) {
             return res.status(404).json({ message: 'User not found.' });
         }
@@ -140,20 +139,6 @@ router.post('/password/forgot', async (req, res) => {
             console.log('Password reset email sent to:', email);
         }
 
-        // Send the password reset SMS
-        if (phoneNumber) {
-            if (phoneNumber === process.env.TWILIO_PHONE_NUMBER) {
-                return res.status(400).json({ message: 'Recipient phone number cannot be the same as the Twilio phone number.' });
-            }
-
-            await client.messages.create({
-                body: `You requested a password reset. Click the link to reset your password: ${resetLink}`,
-                from: process.env.TWILIO_PHONE_NUMBER,
-                to: phoneNumber,
-            });
-            console.log('Password reset SMS sent to:', phoneNumber);
-        }
-
         res.status(200).json({ message: 'Password reset instructions sent successfully.' });
     } catch (err) {
         console.error('Forgot Password Error:', err.message);
@@ -161,9 +146,10 @@ router.post('/password/forgot', async (req, res) => {
     }
 });
 
-router.post('/password/reset', async (req, res) => {
+router.post('/password/reset/:token', async (req, res) => {
     try {
-        const { token, newPassword } = req.body;
+        const { newPassword } = req.body;
+        const { token } = req.params; // Get the token from the URL parameters
 
         // Validate input
         if (!token || !newPassword) {
@@ -459,6 +445,7 @@ router.post('/accept-invitation', async (req, res) => {
         res.status(500).json({ message: 'An error occurred while accepting the invitation.' });
     }
 });
+
 
 
 module.exports = router
