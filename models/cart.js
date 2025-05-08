@@ -14,7 +14,7 @@ const cartSchema = new mongoose.Schema(
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: 'Product',
+          ref: 'Products',
           required: [true, 'Product is required']
         },
         quantity: {
@@ -46,14 +46,14 @@ const cartSchema = new mongoose.Schema(
       type: String,
       enum: ['active', 'pending'],
       default: 'active'
-    },
+    }
 
     // Auto-delete the cart after 15 minutes using MongoDB TTL index
-    expiresAt: {
+    /* expiresAt: {
       type: Date,
       default: () => new Date(Date.now() + 15 * 60 * 1000),
       index: { expires: 0 } // 0 means expire exactly at the time of the date
-    }
+    }*/
   },
   {
     timestamps: true // Adds createdAt and updatedAt fields automatically

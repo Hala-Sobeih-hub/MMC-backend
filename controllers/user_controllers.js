@@ -3,7 +3,11 @@ const User = require('../models/user.js') // Import the User model
 const bcrypt = require('bcrypt') // Import bcrypt for password hashing
 const jwt = require('jsonwebtoken') // Import jsonwebtoken for token generation
 const authMiddleware = require('../middleware/authMiddleware.js') // Import the authentication middleware
-require('dotenv').config() // Import dotenv and configure it
+const isAdmin = require('../middleware/adminMiddleware.js')
+const dotenv = require('dotenv') // Import dotenv for environment variables
+const nodemailer = require('nodemailer') // Import nodemailer for sending emails
+const twilio = require('twilio') // Import Twilio for sending SMS
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN) // Initialize Twilio client
 
 const router = express.Router()
 
@@ -86,30 +90,97 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// User changes their password
-router.patch('/change-password', authMiddleware, async (req, res) => {
+router.post('/password/forgot', async (req, res) => {
     try {
-        const { email, currentPassword, newPassword } = req.body;
+        console.log('Request Body:', req.body); // Log the request body
+
+        const { email, phoneNumber } = req.body;
 
         // Validate input
-        if (!email || !currentPassword || !newPassword) {
-            return res.status(400).json({ message: 'Please provide email, current password, and new password.' });
+        if (!email && !phoneNumber) {
+            return res.status(400).json({ message: 'Email or phone number is required.' });
         }
 
-        // Find the user by email
-        const user = await User.findOne({ email });
+        // Find the user by email or phone number
+        const user = await User.findOne({ $or: [{ email }, { phoneNumber }] });
         if (!user) {
             return res.status(404).json({ message: 'User not found.' });
         }
 
-        // Verify the current password
-        const isMatch = await bcrypt.compare(currentPassword, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ message: 'Current password is incorrect.' });
+        // Generate a password reset token
+        const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+            expiresIn: '1h', // Token expires in 1 hour
+        });
+
+        // Generate the reset link
+        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+        // Send the password reset email
+        if (email) {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail', // Use your email service
+                auth: {
+                    user: process.env.EMAIL_USER, // Your email address
+                    pass: process.env.EMAIL_PASS, // Your email password
+                },
+            });
+
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: 'Password Reset',
+                html: `
+                    <p>You requested a password reset. Click the link below to reset your password:</p>
+                    <a href="${resetLink}">Reset Password</a>
+                    <p>This link will expire in 1 hour.</p>
+                `,
+            };
+
+            await transporter.sendMail(mailOptions);
+            console.log('Password reset email sent to:', email);
+        }
+
+        // Send the password reset SMS
+        if (phoneNumber) {
+            if (phoneNumber === process.env.TWILIO_PHONE_NUMBER) {
+                return res.status(400).json({ message: 'Recipient phone number cannot be the same as the Twilio phone number.' });
+            }
+
+            await client.messages.create({
+                body: `You requested a password reset. Click the link to reset your password: ${resetLink}`,
+                from: process.env.TWILIO_PHONE_NUMBER,
+                to: phoneNumber,
+            });
+            console.log('Password reset SMS sent to:', phoneNumber);
+        }
+
+        res.status(200).json({ message: 'Password reset instructions sent successfully.' });
+    } catch (err) {
+        console.error('Forgot Password Error:', err.message);
+        res.status(500).json({ message: 'An error occurred while sending the password reset instructions. Please try again later.' });
+    }
+});
+
+router.post('/password/reset', async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        // Validate input
+        if (!token || !newPassword) {
+            return res.status(400).json({ message: 'Token and new password are required.' });
+        }
+
+        // Verify the token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Find the user by ID
+        const user = await User.findById(decoded.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
         }
 
         // Hash the new password
-        const hashedPassword = await bcrypt.hash(newPassword, +process.env.SALT);
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         // Update the user's password
         user.password = hashedPassword;
@@ -117,12 +188,12 @@ router.patch('/change-password', authMiddleware, async (req, res) => {
 
         res.status(200).json({ message: 'Password updated successfully.' });
     } catch (err) {
-        console.error('Change Password Error:', err.message);
-        res.status(500).json({ message: 'An error occurred while changing the password. Please try again later.' });
+        console.error('Reset Password Error:', err.message);
+        res.status(500).json({ message: 'An error occurred while resetting the password. Please try again later.' });
     }
 });
 
-
+// User updates their profile
 router.delete('/delete/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params
@@ -154,7 +225,7 @@ router.delete('/delete/:id', authMiddleware, async (req, res) => {
         })
     }
 })
-
+// Admin views all users
 router.get('/all', authMiddleware, async (req, res) => {
     try {
         // Check if the user is an admin
@@ -236,7 +307,7 @@ router.post('/request-deletion', authMiddleware, async (req, res) => {
 })
 
 // Admin views all pending deletion requests
-router.get('/deletion-requests', authMiddleware, async (req, res) => {
+router.get('/deletion-requests', /*authMiddleware,*/ isAdmin, async (req, res) => {
     try {
         if (!req.user.isAdmin) {
             return res.status(403).json({ message: 'Access denied. Admins only.' })
@@ -258,7 +329,7 @@ router.get('/deletion-requests', authMiddleware, async (req, res) => {
 
 
 // Admin approves or rejects a deletion request
-router.patch('/deletion-requests/:userId', authMiddleware, async (req, res) => {
+router.patch('/deletion-requests/:userId', /*authMiddleware,*/ async (req, res) => {
     try {
         if (!req.user.isAdmin) {
             return res.status(403).json({ message: 'Access denied. Admins only.' })
@@ -304,5 +375,90 @@ router.patch('/deletion-requests/:userId', authMiddleware, async (req, res) => {
         })
     }
 })
+
+// Admin sends an invitation to a potential admin
+router.post('/invite-admin', authMiddleware, isAdmin, async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        // Validate email
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required.' });
+        }
+
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User with this email already exists.' });
+        }
+
+        // Generate a unique invitation token
+        const invitationToken = jwt.sign({ email, role: 'Admin' }, process.env.JWT_SECRET, {
+            expiresIn: '1d', // Token expires in 1 day
+        });
+
+        // Send the invitation email
+        const transporter = nodemailer.createTransport({
+            service: 'gmail', // Use your email service
+            auth: {
+                user: process.env.EMAIL_USER, // Your email address
+                pass: process.env.EMAIL_PASS, // Your email password
+            },
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'Admin Invitation',
+            html: `
+                <p>You have been invited to join as an admin on our platform.</p>
+                <p>Click the link below to accept the invitation:</p>
+                <a href="${process.env.FRONTEND_URL}/accept-invitation?token=${invitationToken}">Accept Invitation</a>
+                <p>This link will expire in 24 hours.</p>
+            `,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ message: 'Invitation email sent successfully.' });
+    } catch (err) {
+        console.error('Error sending admin invitation:', err.message);
+        res.status(500).json({ message: 'An error occurred while sending the invitation email.' });
+    }
+});
+
+router.post('/accept-invitation', async (req, res) => {
+    try {
+        const { token, password } = req.body;
+
+        // Validate input
+        if (!token || !password) {
+            return res.status(400).json({ message: 'Token and password are required.' });
+        }
+
+        // Verify the token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email: decoded.email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User with this email already exists.' });
+        }
+
+        // Create the new admin user
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await User.create({
+            email: decoded.email,
+            password: hashedPassword,
+            role: decoded.role, // Set role to 'Admin'
+        });
+
+        res.status(201).json({ message: 'Admin account created successfully.', user: newUser });
+    } catch (err) {
+        console.error('Error accepting admin invitation:', err.message);
+        res.status(500).json({ message: 'An error occurred while accepting the invitation.' });
+    }
+});
+
 
 module.exports = router

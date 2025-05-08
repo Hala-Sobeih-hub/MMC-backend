@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const User = require('../models/user')
 
 //
 const bookingSchema = new mongoose.Schema(
@@ -6,7 +7,7 @@ const bookingSchema = new mongoose.Schema(
     // Reference to the User
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: User,
       required: true
     },
 
@@ -19,7 +20,7 @@ const bookingSchema = new mongoose.Schema(
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: 'Product',
+          ref: 'Products',
           required: true
         },
         quantity: {
