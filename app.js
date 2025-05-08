@@ -18,6 +18,7 @@ const app = express()
 
 const PORT = process.env.PORT || 8080
 
+<<<<<<< HEAD
 // app.get("/send-email", (req, res) => {
 //   try {
 //     const mailOptions = {
@@ -41,6 +42,8 @@ const PORT = process.env.PORT || 8080
 
 
 
+=======
+>>>>>>> cce5dc1d8163fc4bcf85ecb2ed0b72dff167cdf0
 // const authMiddleware = require('./middleware/authMiddleware.js')
 
 
@@ -58,20 +61,18 @@ const bookingController = require('./controllers/booking-routes.js')
 const testimonialsController = require('./controllers/TestimonialsRoutes.js')
 const productsController = require('./controllers/ProductsRoutes.js')
 const userController = require('./controllers/user_controllers.js')
+const promotionController = require('./controllers/promotion-routes.js')
 
 //* Routes
-// app.use(authMiddleware); 
+// app.use(authMiddleware);
 app.use('/api/booking', bookingController)
 app.use('/api/cart', cartController)
-app.use('/api/users', userController);
+app.use('/api/users', userController)
 // app.use(authMiddleware);
 
 app.use('/api/testimonials', testimonialsController)
 app.use('/api/products', productsController)
-app.use('/api/booking', bookingController)
-
-
-
+app.use('/api/promotion', promotionController)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
