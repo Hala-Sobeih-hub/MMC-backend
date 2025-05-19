@@ -17,6 +17,8 @@ const authMiddleware = async (req, res, next) => {
     try {
       // Extract and verify the token
       token = req.headers.authorization.split(' ')[1]
+      // console.log(`token = ${req.headers.authorization}`)
+
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
       // console.log(`decoded= ${decoded}`)
