@@ -4,14 +4,79 @@ const Cart = require('../models/cart') //Import the Cart model
 const Product = require('../models/Products')
 const authMiddleware = require('../middleware/authMiddleware.js') // Import the authentication middleware
 
+// // POST - 'localhost:8080/api/cart/add-item' - Add or update an item in cart - Logged in User
+// router.post('/add-item', authMiddleware, async (req, res) => {
+//   try {
+//     const { _id } = req.user
+//     const { productId, quantity, rentalDate } = req.body
+
+//     if (!productId || !quantity || !rentalDate) {
+//       return res
+//         .status(400)
+//         .json({ message: 'Product, quantity, and rental date are required.' })
+//     }
+
+//     // Fetch the product details to get the current price
+//     const product = await Product.findById(productId)
+//     if (!product) {
+//       return res.status(404).json({ message: 'Product not found.' })
+//     }
+
+//     const price = product.onSale ? product.salePrice : product.price
+
+//     // Check if the user already has a cart
+//     let cart = await Cart.findOne({ userId })
+
+//     if (!cart) {
+//       // If no cart, create a new one
+//       cart = new Cart({
+//         userId,
+//         itemsList: [{ productId, quantity, price }],
+//         deliveryAddress: 'TBD', // You can set this dynamically in frontend or another step
+//         eventNotes: '',
+//         status: 'active'
+//       })
+//     } else {
+//       // If cart exists, check if the product is already in the cart
+//       const existingItemIndex = cart.itemsList.findIndex(
+//         item => item.productId.toString() === productId
+//       )
+
+//       if (existingItemIndex !== -1) {
+//         // Update quantity
+//         cart.itemsList[existingItemIndex].quantity += quantity
+//       } else {
+//         // Add new product to itemsList
+//         cart.itemsList.push({ productId, quantity, price })
+//       }
+//     }
+
+//     await cart.save()
+
+//     res.status(200).json({
+//       result: cart,
+//       message: 'Cart updated successfully.'
+//     })
+//   } catch (error) {
+//     res.status(500).json({
+//       Error: error.message
+//     })
+//   }
+// })
+
 //POST - 'localhost:8080/api/cart - create a new cart - Logged in User
 router.post('/', authMiddleware, async (req, res) => {
   try {
+    //get the user ID from the request params
+    const { _id } = req.user
+
     //get cart data from the request body
-    const { userId, itemsList, deliveryAddress, eventNotes } = req.body
+    const { itemsList, totalPrice, rentalDate, deliveryAddress, eventNotes } =
+      req.body
 
     //if any of the fields are missing (except for eventNotes which is optional)
-    if (!userId || !itemsList || !deliveryAddress) {
+    // if (!itemsList || !deliveryAddress) {
+    if (!itemsList) {
       return res.status(400).json({
         message: 'All fields are Required!' // Return a 400 status code and a message
       })
@@ -21,6 +86,8 @@ router.post('/', authMiddleware, async (req, res) => {
     const newCart = new Cart({
       userId,
       itemsList,
+      totalPrice,
+      rentalDate,
       deliveryAddress,
       eventNotes,
       status: 'active'
@@ -81,12 +148,13 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 })
 
-//GET cart by User ID - 'localhost:8080/api/cart/user/:_id' - display one cart by UserID - Logged in User
-router.get('/user/:_id', authMiddleware, async (req, res) => {
+//GET cart by User ID - 'localhost:8080/api/cart/user/' - display one cart by UserID - Logged in User
+router.get('/user/', authMiddleware, async (req, res) => {
   try {
     //get the user ID from the request params
-    const { _id } = req.params
+    const { _id } = req.user
 
+    // console.log(req.user)
     //find the cart by user ID in the database
     const cart = await Cart.findOne({ userId: _id })
       .populate({
@@ -97,6 +165,10 @@ router.get('/user/:_id', authMiddleware, async (req, res) => {
         path: 'itemsList.productId',
         select: 'name imageUrl price'
       })
+
+    // console.log(cart.userId.email)
+    // console.log(cart.itemsList[0].productId.name)
+
     //if no cart matches the given ID
     if (!cart) {
       return res.status(404).json({
@@ -163,9 +235,16 @@ router.put('/:_id', authMiddleware, async (req, res) => {
     const { _id } = req.params
 
     //get the updated fields (updated list of products) from the request body
-    const { itemsList, deliveryAddress, eventNotes } = req.body
+    const { itemsList, totalPrice, rentalDate, deliveryAddress, eventNotes } =
+      req.body
 
-    const cartToBeUpdated = { itemsList, deliveryAddress, eventNotes }
+    const cartToBeUpdated = {
+      itemsList,
+      totalPrice,
+      rentalDate,
+      deliveryAddress,
+      eventNotes
+    }
 
     //options: (Optional) An object specifying options such as new
     //new: If set to true, returns the modified document rather than the original. Defaults to false.

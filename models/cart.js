@@ -32,6 +32,17 @@ const cartSchema = new mongoose.Schema(
       }
     ],
 
+    totalPrice: {
+      type: Number,
+      required: [true, 'Total price is required'],
+      min: [0, 'Total price must be a positive number']
+    },
+
+    rentalDate: {
+      type: Date,
+      required: true
+    },
+
     deliveryAddress: {
       type: String,
       required: true
