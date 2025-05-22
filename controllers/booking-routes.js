@@ -10,7 +10,7 @@ router.post('/', authMiddleware, async (req, res) => {
     //get booking data from the request body
     const {
       //userId,  //should come from the token!!
-      email,
+      //email,
       itemsList,
       totalPrice,
       rentalDate,
@@ -21,7 +21,7 @@ router.post('/', authMiddleware, async (req, res) => {
     //if any of the fields are missing, except for eventNotes which is optional
     if (
       //!userId ||
-      !email ||
+      //!email ||
       !itemsList ||
       !totalPrice ||
       !rentalDate ||
@@ -43,7 +43,7 @@ router.post('/', authMiddleware, async (req, res) => {
     //create a new booking object
     const newBooking = new Booking({
       userId: req.user.id,
-      email,
+      email: req.user.email,
       itemsList: itemsListIds,
       totalPrice,
       rentalDate,
@@ -79,11 +79,12 @@ router.get('/my-bookings', authMiddleware, async (req, res) => {
 
     //const userId = new mongoose.Types.ObjectId(req.user.id)
     const userId = req.user.id // Assuming JWT stores this (should be req.user.id)
-    console.log(`Type of UserId = ${typeof req.user.id}`) // 'string' vs 'object'
-    console.log(`userId from bookings routes= ${userId}`)
+    // console.log(`Type of UserId = ${typeof req.user.id}`) // 'string' vs 'object'
+    // console.log(`userId from bookings routes= ${userId}`)
 
-    console.log('userId from req.user:', req.user.id)
+    // console.log('userId from req.user:', req.user.id)
     const bookings = await Booking.find({ userId: userId })
+      .sort({ createdAt: -1 })
       .populate({
         path: 'userId',
         select: 'firstName lastName email phoneNumber'
@@ -92,7 +93,7 @@ router.get('/my-bookings', authMiddleware, async (req, res) => {
         path: 'itemsList.productId',
         select: 'name imageUrl price'
       })
-    console.log('Booking Query Result:', bookings)
+    //console.log('Booking Query Result:', bookings)
 
     // const bookings = await Booking.find({ userId: userId })
     //   .sort({ createdAt: -1 })
@@ -263,6 +264,32 @@ router.get(
     }
   }
 )
+
+router.put('/:id/update-address', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params
+    const { deliveryAddress } = req.body
+
+    const booking = await Booking.findByIdAndUpdate(
+      id,
+      { deliveryAddress },
+      { new: true }
+    )
+
+    if (!booking) return res.status(404).send({ error: 'Booking not found' })
+
+    //res.send(booking)
+    //return the successful message
+    res.status(200).json({
+      result: booking,
+      message: 'Booking was updated!'
+    })
+  } catch (error) {
+    console.error('Error updating address:', error)
+    res.status(500).json({ error: 'Failed to update address' })
+    //return a 500 stats code and an error message
+  }
+})
 
 //PUT one- 'localhost:8080/api/booking/:_id - update one booking by ID - Admin Only
 router.put(
