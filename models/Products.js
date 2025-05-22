@@ -4,7 +4,7 @@ const ProductsSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
-    price: { type: Number, /*type: String,*/ required: true },
+    price: { type: Number, required: true },
     imageUrl: { type: String, required: true },
 
     available: { type: Boolean, default: true }, // Indicates if the product is available
@@ -23,14 +23,17 @@ const ProductsSchema = new mongoose.Schema(
       }
     },
 
-    //Sale-related fields
-    onSale: { type: Boolean, default: false },
+    // The date when the product is booked
+    bookedDate: {
+      type: Date
+    },
+
     salePrice: {
       type: Number,
       validate: {
         validator: function (value) {
           // Ensure salePrice is less than the original price
-          return value < this.price
+          return value <= this.price
         },
         message: 'Sale price must be less than the original price.'
       }

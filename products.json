@@ -1,0 +1,56 @@
+[
+    {
+        "_id": "681007ea703687bdf1ba580a",
+        "name": "Bahama Blast Dual Lane Center Climb Inflatable Water Slide",
+        "description": "28' x 19' x 15' Bring paradise to any event with BounceWave's 15ft Bahama Blast Commercial Dual Lane Center Climb Inflatable Water Slide!",
+        "price": "475",
+        "imageUrl": "https://example.com/bahama-blast.jpg",
+        "addedUsers": [],
+        "available": true,
+        "availableDate": "2025-05-01T00:00:00.000Z",
+        "createdAt": "2025-04-28T22:57:46.933Z",
+        "updatedAt": "2025-04-28T22:57:46.933Z",
+        "__v": 0
+    },
+    {
+        "_id": "681008dd703687bdf1ba580c",
+        "name": "Castle",
+        "description": "15x15 and will requires at least 20x20 feet of space. Bring royal fun to your party with this vibrant pink and purple castle! With a roomy bounce area and eye-catching design, it's perfect for princess-themed birthdays and backyard events. Great for kids ages 3–10",
+        "price": 250,
+        "imageUrl": "https://example.com/castle.jpg",
+        
+        "available": true,
+        "availableDate": "2025-05-01T00:00:00.000Z",
+        
+    },
+    {
+       
+        "name": "Mega Obstacle Course Challenge",
+        "description": "15x15 and will requires at least 20x20 feet of space. Bring royal fun to your party with this vibrant pink and purple castle! With a roomy bounce area and eye-catching design, it's perfect for princess-themed birthdays and backyard events. Great for kids ages 3–10.",
+        "price": "400",
+        "imageUrl": "https://example.com/MegaObstacle.jpg",
+       
+        "available": true,
+        "availableDate": "2025-05-01T00:00:00.000Z"
+       
+    },
+    {
+        "name": "Black/White Folding Chair",
+        "description": "A classic choice for any event, this durable folding chair is lightweight, sturdy, and easy to set up. Perfect for birthdays, weddings, graduations, and backyard gatherings.",
+        "price": "$4 per chair (25 in stock per color). Additional $20 overnight for all chairs",
+        "imageUrl": "https://example.com/chairs.jpg",
+        "available": true,
+        "availableDate": "2025-05-01T00:00:00.000Z",
+       
+    },
+    {
+        
+        "name": "6' Rectangular Banquet Table",
+        "description": "Color is white granite. Superior strength and durability. Made of high-impact polyethylene. Attractive in style and appearance",
+        "price": "$12 (10 in stock) Additional $20 overnight for all tables",
+        "imageUrl": "https://example.com/tables.jpg",
+        "available": true,
+        "availableDate": "2025-05-01T00:00:00.000Z",
+
+    }
+]
