@@ -112,7 +112,7 @@ router.post('/password/forgot', async (req, res) => {
         });
 
         // Generate the reset link
-        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+        const resetLink = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
 
         // Send the password reset email
         if (email) {
@@ -127,7 +127,7 @@ router.post('/password/forgot', async (req, res) => {
             const mailOptions = {
                 from: process.env.EMAIL_USER,
                 to: email,
-                subject: 'Password Reset',
+                subject: 'MMC Inflatables Password Reset',
                 html: `
                     <p>You requested a password reset. Click the link below to reset your password:</p>
                     <a href="${resetLink}">Reset Password</a>
@@ -149,7 +149,7 @@ router.post('/password/forgot', async (req, res) => {
 router.post('/password/reset/:token', async (req, res) => {
     try {
         const { newPassword } = req.body;
-        const { token } = req.params; // Get the token from the URL parameters
+        const { token } = req.params;
 
         // Validate input
         if (!token || !newPassword) {
@@ -165,11 +165,32 @@ router.post('/password/reset/:token', async (req, res) => {
             return res.status(404).json({ message: 'User not found.' });
         }
 
+        // // Check if the token has already been used
+        // if (user.passwordResetTokenUsed) {
+        //     return res.status(400).json({ message: 'This reset token has already been used.' });
+        // }
+
+        // Check if the new password matches the old password
+        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+        if (isSamePassword) {
+            return res.status(400).json({ message: 'New password cannot be the same as the old password.' });
+        }
+
+        // Validate password complexity
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            return res.status(400).json({
+                message:
+                    'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.',
+            });
+        }
+
         // Hash the new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        // Update the user's password
+        // Update the user's password and mark the token as used
         user.password = hashedPassword;
+        user.passwordResetTokenUsed = true; // Mark the token as used
         await user.save();
 
         res.status(200).json({ message: 'Password updated successfully.' });
@@ -221,7 +242,7 @@ router.get('/all', authMiddleware, async (req, res) => {
 
         const users = await User.find()
             .sort('firstName')
-            .select({ firstName: 1, lastName: 1, email: 1 })
+            .select({ firstName: 1, lastName: 1, email: 1, role: 1, isAdmin: 1 })
 
         res.status(200).json({
             AllUsers: users
@@ -443,6 +464,37 @@ router.post('/accept-invitation', async (req, res) => {
     } catch (err) {
         console.error('Error accepting admin invitation:', err.message);
         res.status(500).json({ message: 'An error occurred while accepting the invitation.' });
+    }
+});
+
+router.patch('/update-role/:userId', authMiddleware, isAdmin, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { role } = req.body;
+
+        // Validate input
+        if (!role) {
+            return res.status(400).json({ message: 'Role is required.' });
+        }
+
+        // Find the user by ID
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        if (role == "Admin") {
+            user.isAdmin = true;
+        } else {
+            user.isAdmin = false;
+        }
+        // Update the user's role
+        user.role = role;
+        await user.save();
+
+        res.status(200).json({ message: 'User role updated successfully.', user });
+    } catch (err) {
+        console.error('Error updating user role:', err.message);
+        res.status(500).json({ message: 'An error occurred while updating the user role.' });
     }
 });
 
