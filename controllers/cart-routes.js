@@ -81,6 +81,43 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 })
 
+//GET cart by User ID - 'localhost:8080/api/cart/user/:_id' - display one cart by UserID - Logged in User
+router.get('/user/:_id', authMiddleware, async (req, res) => {
+  try {
+    //get the user ID from the request params
+    const { _id } = req.params
+
+    //find the cart by user ID in the database
+    const cart = await Cart.findOne({ userId: _id })
+      .populate({
+        path: 'userId',
+        select: 'firstName lastName email phoneNumber'
+      })
+      .populate({
+        path: 'itemsList.productId',
+        select: 'name imageUrl price'
+      })
+    //if no cart matches the given ID
+    if (!cart) {
+      return res.status(404).json({
+        message:
+          'Your cart has expired or was not found. Please start a new order.'
+      })
+    }
+
+    //if cart was found, return the successful response
+    res.status(200).json({
+      result: cart,
+      message: 'Cart was retrieved successfully'
+    })
+  } catch (error) {
+    //return a 500 stats code and an error message
+    res.status(500).json({
+      Error: `${error.message}`
+    })
+  }
+})
+
 //GET one - 'localhost:8080/api/cart/:_id' - display one cart by ID - Logged in User
 router.get('/:_id', authMiddleware, async (req, res) => {
   try {
