@@ -71,8 +71,14 @@ router.post('/', authMiddleware, async (req, res) => {
     const { _id } = req.user
 
     //get cart data from the request body
-    const { itemsList, totalPrice, rentalDate, deliveryAddress, eventNotes } =
-      req.body
+    const {
+      userId,
+      itemsList,
+      totalPrice,
+      rentalDate,
+      deliveryAddress,
+      eventNotes
+    } = req.body
 
     //if any of the fields are missing (except for eventNotes which is optional)
     // if (!itemsList || !deliveryAddress) {
