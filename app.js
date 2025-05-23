@@ -33,7 +33,7 @@ connectDB()
 const cartController = require('./controllers/cart-routes.js')
 const bookingController = require('./controllers/booking-routes.js')
 const testimonialsController = require('./controllers/TestimonialsRoutes.js')
-const productsController = require('./controllers/ProductsRoutes.js')
+const productsController = require('./Controllers/ProductsRoutes.js')
 const userController = require('./controllers/user_controllers.js')
 const promotionController = require('./controllers/promotion-routes.js')
 
