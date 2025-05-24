@@ -128,6 +128,7 @@ router.post('/create', authMiddleware, async (req, res) => {
     // If no cart exists, create a new empty one
     // Optionally accept rentalDate from client
     const { rentalDate } = req.body
+    //console.log('Creating cart with rentalDate:', rentalDate)
 
     if (!rentalDate) {
       return res
@@ -145,6 +146,8 @@ router.post('/create', authMiddleware, async (req, res) => {
       status: 'active'
     })
 
+    //console.log('New cart created:', newCart)
+    // Save the new cart to the database
     const savedCart = await newCart.save()
 
     res.status(201).json({ result: newCart })
