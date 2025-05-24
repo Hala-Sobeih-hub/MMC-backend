@@ -10,16 +10,15 @@ const transporter = nodemailer.createTransport({
   service: 'gmail', // Use your email service
   auth: {
     user: process.env.EMAIL_USER, // Your email address
-    pass: process.env.EMAIL_PASS, // Your email password
-  },
-});
+    pass: process.env.EMAIL_PASS // Your email password
+  }
+})
 
 const app = express()
 
 const PORT = process.env.PORT || 8080
 
 // const authMiddleware = require('./middleware/authMiddleware.js')
-
 
 // Middleware
 app.use(express.json())
@@ -33,7 +32,7 @@ connectDB()
 const cartController = require('./controllers/cart-routes.js')
 const bookingController = require('./controllers/booking-routes.js')
 const testimonialsController = require('./controllers/TestimonialsRoutes.js')
-const productsController = require('./Controllers/ProductsRoutes.js')
+const productsController = require('./controllers/ProductsRoutes.js')
 const userController = require('./controllers/user_controllers.js')
 const promotionController = require('./controllers/promotion-routes.js')
 

@@ -14,19 +14,19 @@ const cartSchema = new mongoose.Schema(
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: 'Products',
-          required: [true, 'Product is required']
+          ref: 'Products'
+          //required: [true, 'Product is required']
         },
         quantity: {
           type: Number,
-          required: [true, 'Quantity is required'],
+          //required: [true, 'Quantity is required'],
           min: [1, 'Quantity must be at least 1']
         },
         // I kept the price
         //  It avoids an extra database call to the Product collection every time you display a cart or booking.
         price: {
           type: Number,
-          required: [true, 'Price is required'],
+          //required: [true, 'Price is required'],
           min: [0, 'Price must be a positive number']
         }
       }
@@ -44,8 +44,8 @@ const cartSchema = new mongoose.Schema(
     },
 
     deliveryAddress: {
-      type: String,
-      required: true
+      type: String
+      //required: true
     },
 
     eventNotes: {
