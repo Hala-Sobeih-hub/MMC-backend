@@ -15,3 +15,8 @@ Admin user:
 "username": "Maximillionaire",
 "password": "1234567"
 }
+
+{
+"username": "KevGotIt",
+"password": "12345654321"
+}

@@ -114,6 +114,106 @@ router.post('/', authMiddleware, async (req, res) => {
     })
   }
 })
+// POST - 'localhost:8080/api/cart/create' - create a new Empty cart - Logged in User
+router.post('/create', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id
+    const existingCart = await Cart.findOne({ userId })
+
+    //if cart already exists, return it
+    if (existingCart) {
+      return res.status(200).json({ result: existingCart })
+    }
+
+    // If no cart exists, create a new empty one
+    // Optionally accept rentalDate from client
+    const { rentalDate } = req.body
+
+    if (!rentalDate) {
+      return res
+        .status(400)
+        .json({ error: 'Rental date is required to create cart' })
+    }
+
+    const newCart = new Cart({
+      userId,
+      itemsList: [],
+      totalPrice: 0,
+      rentalDate,
+      deliveryAddress: '', // Set default value to pass validation
+      eventNotes: '', // Optional
+      status: 'active'
+    })
+
+    const savedCart = await newCart.save()
+
+    res.status(201).json({ result: newCart })
+  } catch (err) {
+    console.error('Error creating cart:', err)
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// POST /api/cart/add-item
+router.post('/add-item', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id
+    const { productId, quantity, rentalDate } = req.body
+
+    if (!productId || !quantity || !rentalDate) {
+      return res.status(400).json({ message: 'Missing required fields' })
+    }
+
+    const product = await Product.findById(productId)
+    if (!product) return res.status(404).json({ message: 'Product not found' })
+
+    let cart = await Cart.findOne({ userId })
+
+    // If the user's cart doesn't exist, create a new one
+    if (!cart) {
+      cart = new Cart({
+        userId,
+        rentalDate,
+        itemsList: []
+      })
+    }
+
+    // If cart exists but rentalDate is different, reset the cart
+    if (
+      cart.rentalDate &&
+      new Date(cart.rentalDate).toISOString() !==
+        new Date(rentalDate).toISOString()
+    ) {
+      // cart.itemsList = []
+      // cart.rentalDate = rentalDate
+      return res
+        .status(409)
+        .json({ message: 'Rental Date is different than your cart.' })
+    }
+
+    // Check if product already exists in cart
+    const existingItem = cart.itemsList.find(
+      item => item.productId.toString() === productId
+    )
+
+    if (existingItem) {
+      existingItem.quantity += quantity
+    } else {
+      cart.itemsList.push({
+        productId,
+        quantity,
+        price: product.onSale ? product.salePrice : product.price
+      })
+    }
+
+    await cart.save()
+    const populatedCart = await cart.populate('itemsList.productId')
+    res.status(200).json(populatedCart)
+  } catch (error) {
+    console.error('Add item error:', error)
+    res.status(500).json({ message: 'Server error' })
+  }
+})
 
 //GET all - 'localhost:8080/api/cart/' - display all carts - Admin Only
 router.get('/', authMiddleware, async (req, res) => {
@@ -231,6 +331,85 @@ router.get('/:_id', authMiddleware, async (req, res) => {
     res.status(500).json({
       Error: `${error.message}`
     })
+  }
+})
+
+// PUT /api/cart/update-item
+router.put('/update-item', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id
+    const { productId, quantity } = req.body
+
+    if (!productId || typeof quantity !== 'number') {
+      return res
+        .status(400)
+        .json({ message: 'Product ID and quantity are required' })
+    }
+
+    const cart = await Cart.findOne({ userId })
+    if (!cart) {
+      return res.status(404).json({ message: 'Cart not found' })
+    }
+
+    const item = cart.itemsList.find(
+      item => item.productId.toString() === productId
+    )
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found in cart' })
+    }
+
+    if (quantity <= 0) {
+      // Remove item if quantity is zero or less
+      cart.itemsList = cart.itemsList.filter(
+        item => item.productId.toString() !== productId
+      )
+    } else {
+      // Update quantity
+      item.quantity = quantity
+    }
+
+    await cart.save()
+    const populatedCart = await cart.populate('itemsList.productId')
+    res.status(200).json(populatedCart)
+  } catch (err) {
+    console.error('Update item error:', err)
+    res.status(500).json({ message: 'Server error' })
+  }
+})
+
+// PUT /api/cart/remove-item
+router.put('/remove-item', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user._id
+    const { productId } = req.body
+
+    if (!productId) {
+      return res.status(400).json({ message: 'Product ID is required' })
+    }
+
+    const cart = await Cart.findOne({ userId })
+    if (!cart) {
+      return res.status(404).json({ message: 'Cart not found' })
+    }
+
+    const itemExists = cart.itemsList.some(
+      item => item.productId.toString() === productId
+    )
+    if (!itemExists) {
+      return res.status(404).json({ message: 'Item not found in cart' })
+    }
+
+    // Remove the item from itemsList
+    cart.itemsList = cart.itemsList.filter(
+      item => item.productId.toString() !== productId
+    )
+    await cart.save()
+
+    const populatedCart = await cart.populate('itemsList.productId')
+    res.status(200).json(populatedCart)
+  } catch (err) {
+    console.error('Remove item error:', err)
+    res.status(500).json({ message: 'Server error' })
   }
 })
 
