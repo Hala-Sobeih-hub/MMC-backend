@@ -4,66 +4,6 @@ const Cart = require('../models/cart') //Import the Cart model
 const Product = require('../models/Products')
 const authMiddleware = require('../middleware/authMiddleware.js') // Import the authentication middleware
 
-// // POST - 'localhost:8080/api/cart/add-item' - Add or update an item in cart - Logged in User
-// router.post('/add-item', authMiddleware, async (req, res) => {
-//   try {
-//     const { _id } = req.user
-//     const { productId, quantity, rentalDate } = req.body
-
-//     if (!productId || !quantity || !rentalDate) {
-//       return res
-//         .status(400)
-//         .json({ message: 'Product, quantity, and rental date are required.' })
-//     }
-
-//     // Fetch the product details to get the current price
-//     const product = await Product.findById(productId)
-//     if (!product) {
-//       return res.status(404).json({ message: 'Product not found.' })
-//     }
-
-//     const price = product.onSale ? product.salePrice : product.price
-
-//     // Check if the user already has a cart
-//     let cart = await Cart.findOne({ userId })
-
-//     if (!cart) {
-//       // If no cart, create a new one
-//       cart = new Cart({
-//         userId,
-//         itemsList: [{ productId, quantity, price }],
-//         deliveryAddress: 'TBD', // You can set this dynamically in frontend or another step
-//         eventNotes: '',
-//         status: 'active'
-//       })
-//     } else {
-//       // If cart exists, check if the product is already in the cart
-//       const existingItemIndex = cart.itemsList.findIndex(
-//         item => item.productId.toString() === productId
-//       )
-
-//       if (existingItemIndex !== -1) {
-//         // Update quantity
-//         cart.itemsList[existingItemIndex].quantity += quantity
-//       } else {
-//         // Add new product to itemsList
-//         cart.itemsList.push({ productId, quantity, price })
-//       }
-//     }
-
-//     await cart.save()
-
-//     res.status(200).json({
-//       result: cart,
-//       message: 'Cart updated successfully.'
-//     })
-//   } catch (error) {
-//     res.status(500).json({
-//       Error: error.message
-//     })
-//   }
-// })
-
 //POST - 'localhost:8080/api/cart - create a new cart - Logged in User
 router.post('/', authMiddleware, async (req, res) => {
   try {
@@ -177,7 +117,11 @@ router.post('/add-item', authMiddleware, async (req, res) => {
       cart = new Cart({
         userId,
         rentalDate,
-        itemsList: []
+        itemsList: [],
+        totalPrice: 0,
+        deliveryAddress: '', // Set default value to pass validation
+        eventNotes: '', // Optional
+        status: 'active'
       })
     }
 
@@ -189,9 +133,13 @@ router.post('/add-item', authMiddleware, async (req, res) => {
     ) {
       // cart.itemsList = []
       // cart.rentalDate = rentalDate
-      return res
-        .status(409)
-        .json({ message: 'Rental Date is different than your cart.' })
+      return res.status(409).json({
+        message: `The rental Date you chose ${new Date(
+          rentalDate
+        ).toLocaleDateString()} is different than the one in your cart ${new Date(
+          cart.rentalDate
+        ).toLocaleDateString()}`
+      })
     }
 
     // Check if product already exists in cart
@@ -207,6 +155,10 @@ router.post('/add-item', authMiddleware, async (req, res) => {
         quantity,
         price: product.onSale ? product.salePrice : product.price
       })
+
+      cart.totalPrice += product.onSale
+        ? product.salePrice * quantity
+        : product.price * quantity
     }
 
     await cart.save()
@@ -337,7 +289,6 @@ router.get('/:_id', authMiddleware, async (req, res) => {
   }
 })
 
-// PUT /api/cart/update-item
 router.put('/update-item', authMiddleware, async (req, res) => {
   try {
     const userId = req.user._id
@@ -349,13 +300,13 @@ router.put('/update-item', authMiddleware, async (req, res) => {
         .json({ message: 'Product ID and quantity are required' })
     }
 
-    const cart = await Cart.findOne({ userId })
+    const cart = await Cart.findOne({ userId }).populate('itemsList.productId')
     if (!cart) {
       return res.status(404).json({ message: 'Cart not found' })
     }
 
     const item = cart.itemsList.find(
-      item => item.productId.toString() === productId
+      item => item.productId._id.toString() === productId
     )
     if (!item) {
       return res.status(404).json({ message: 'Item not found in cart' })
@@ -364,12 +315,19 @@ router.put('/update-item', authMiddleware, async (req, res) => {
     if (quantity <= 0) {
       // Remove item if quantity is zero or less
       cart.itemsList = cart.itemsList.filter(
-        item => item.productId.toString() !== productId
+        item => item.productId._id.toString() !== productId
       )
     } else {
       // Update quantity
       item.quantity = quantity
     }
+
+    // Recalculate total price with populated product info
+    cart.totalPrice = cart.itemsList.reduce((total, item) => {
+      const product = item.productId
+      const price = product.onSale ? product.salePrice : product.price
+      return total + price * item.quantity
+    }, 0)
 
     await cart.save()
     const populatedCart = await cart.populate('itemsList.productId')
@@ -406,10 +364,35 @@ router.put('/remove-item', authMiddleware, async (req, res) => {
     cart.itemsList = cart.itemsList.filter(
       item => item.productId.toString() !== productId
     )
-    await cart.save()
+    //check if the itemsList is empty
+    //if it is empty, delete the cart
+    //if it is not empty, recalculate the total price
+    // and save the cart
+    if (cart.itemsList.length === 0) {
+      console.log('Cart is empty, deleting it')
+      try {
+        await Cart.findByIdAndDelete(cart._id)
+        return res
+          .status(204) // Success but No Content
+          .json({ message: 'Cart deleted as it became empty' })
+      } catch (err) {
+        console.error('Error deleting cart:', err)
+        return res.status(500).json({ message: 'Server error' })
+      }
+    } else {
+      // Recalculate total price with populated product info
+      await cart.populate('itemsList.productId')
+      cart.totalPrice = cart.itemsList.reduce((total, item) => {
+        const product = item.productId
+        const price = product.onSale ? product.salePrice : product.price
+        return total + price * item.quantity
+      }, 0)
 
-    const populatedCart = await cart.populate('itemsList.productId')
-    res.status(200).json(populatedCart)
+      await cart.save()
+
+      const populatedCart = await cart.populate('itemsList.productId')
+      res.status(200).json(populatedCart)
+    }
   } catch (err) {
     console.error('Remove item error:', err)
     res.status(500).json({ message: 'Server error' })

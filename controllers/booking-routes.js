@@ -49,7 +49,7 @@ router.post('/', authMiddleware, async (req, res) => {
       rentalDate,
       deliveryAddress,
       eventNotes,
-      status: 'confirmed'
+      status: 'pending'
     })
 
     //save new booking to database
@@ -372,6 +372,50 @@ router.delete('/:_id', authMiddleware, async (req, res) => {
     res.status(500).json({
       Error: `${error.message}`
     })
+  }
+})
+
+// PUT /api/booking/:id/cancel
+router.put('/cancel/:id', authMiddleware, async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id)
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' })
+    }
+
+    // Check if booking belongs to the logged-in user
+    if (booking.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Unauthorized' })
+    }
+
+    // Check if booking is already canceled
+    if (booking.status === 'canceled') {
+      return res.status(400).json({ message: 'Booking is already canceled' })
+    }
+
+    // Check if createdAt is within 30 minutes
+    const now = new Date()
+    const createdAt = new Date(booking.createdAt)
+    const timeDiff = (now - createdAt) / (1000 * 60) // in minutes
+
+    console.log('Time difference in minutes:', timeDiff)
+    console.log('Booking created at:', createdAt)
+    console.log('Current time:', now)
+
+    if (timeDiff > 30) {
+      return res
+        .status(403)
+        .json({ message: 'Cannot cancel booking after 30 minutes' })
+    }
+
+    booking.status = 'canceled'
+    await booking.save()
+
+    res.status(200).json({ result: booking, message: 'Booking canceled' })
+  } catch (err) {
+    console.error('Cancel booking error:', err)
+    res.status(500).json({ message: 'Server error' })
   }
 })
 
