@@ -303,9 +303,14 @@ router.put(
         const { _id } = req.params
 
         //get the updated fields (updated status) from the request body
-        const { status } = req.body
+        const { status, rentalDate, eventNotes, deliveryAddress } = req.body
 
-        const bookingToBeUpdated = { status }
+        const bookingToBeUpdated = {
+          status,
+          rentalDate,
+          eventNotes,
+          deliveryAddress
+        }
 
         //options: (Optional) An object specifying options such as new
         //new: If set to true, returns the modified document rather than the original. Defaults to false.
