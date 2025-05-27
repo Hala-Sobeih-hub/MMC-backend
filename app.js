@@ -5,6 +5,10 @@ dotenv.config()
 const cors = require('cors')
 const nodemailer = require('nodemailer')
 
+const path = require('path')
+
+
+
 // Send the password reset email
 const transporter = nodemailer.createTransport({
   service: 'gmail', // Use your email service
@@ -23,6 +27,7 @@ const PORT = process.env.PORT || 8080
 // Middleware
 app.use(express.json())
 app.use(cors())
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 //connect to DB
 const connectDB = require('./config/database.js')
