@@ -7,6 +7,22 @@ const isAdmin = require('../middleware/adminMiddleware.js')
 const dotenv = require('dotenv') // Import dotenv for environment variables
 const nodemailer = require('nodemailer') // Import nodemailer for sending emails
 
+const multer = require('multer') // Import multer for file uploads
+const path = require('path') // Import path for handling file paths
+
+// Set up storage for uploaded files
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "uploads/profile-pics/"); // Make sure this folder exists
+    },
+    filename: function (req, file, cb) {
+        const ext = path.extname(file.originalname);
+        cb(null, req.user.id + "_profile" + ext);
+    },
+});
+const upload = multer({ storage });
+
+
 
 const router = express.Router()
 
@@ -497,6 +513,79 @@ router.patch('/update-role/:userId', authMiddleware, isAdmin, async (req, res) =
         res.status(500).json({ message: 'An error occurred while updating the user role.' });
     }
 });
+
+// Get current user's profile
+router.get('/my-profile', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        res.status(200).json({ result: user });
+    } catch (err) {
+        console.error("Get Profile Error:", err.message);
+        res.status(500).json({ message: "An error occurred while fetching the profile." });
+    }
+});
+
+// Update current user's profile
+router.put('/update-profile', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const {
+            firstName,
+            lastName,
+            email,
+            phoneNumber,
+            deliveryAddress,
+            profilePic
+        } = req.body;
+
+        const updateFields = {};
+        if (firstName !== undefined) updateFields.firstName = firstName;
+        if (lastName !== undefined) updateFields.lastName = lastName;
+        if (email !== undefined) updateFields.email = email;
+        if (phoneNumber !== undefined) updateFields.phoneNumber = phoneNumber;
+        if (deliveryAddress !== undefined) updateFields.deliveryAddress = deliveryAddress;
+        if (profilePic !== undefined) updateFields.profilePic = profilePic;
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: updateFields },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        res.status(200).json({
+            message: "Profile updated successfully.",
+            user: updatedUser
+        });
+    } catch (err) {
+        console.error("Update Profile Error:", err.message);
+        res.status(500).json({ message: "An error occurred while updating the profile." });
+    }
+});
+
+// Profile picture upload endpoint
+router.post(
+    "/upload-profile-pic",
+    authMiddleware,
+    upload.single("profilePic"),
+    async (req, res) => {
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+        // You might want to save the file path to the user's profile here
+        // For now, just return the file URL
+        const url = `/uploads/profile-pics/${req.file.filename}`;
+        // Optionally update user profilePic in DB:
+        await User.findByIdAndUpdate(req.user.id, { profilePic: url });
+        res.json({ url });
+    }
+);
 
 
 
