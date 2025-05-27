@@ -49,7 +49,7 @@ router.post('/', authMiddleware, async (req, res) => {
       rentalDate,
       deliveryAddress,
       eventNotes,
-      status: 'pending'
+      status: 'Pending'
     })
 
     //save new booking to database
@@ -395,7 +395,7 @@ router.put('/cancel/:id', authMiddleware, async (req, res) => {
     }
 
     // Check if booking is already canceled
-    if (booking.status === 'canceled') {
+    if (booking.status === 'Canceled') {
       return res.status(400).json({ message: 'Booking is already canceled' })
     }
 
@@ -404,9 +404,9 @@ router.put('/cancel/:id', authMiddleware, async (req, res) => {
     const createdAt = new Date(booking.createdAt)
     const timeDiff = (now - createdAt) / (1000 * 60) // in minutes
 
-    console.log('Time difference in minutes:', timeDiff)
-    console.log('Booking created at:', createdAt)
-    console.log('Current time:', now)
+    // console.log('Time difference in minutes:', timeDiff)
+    // console.log('Booking created at:', createdAt)
+    // console.log('Current time:', now)
 
     if (timeDiff > 30) {
       return res
@@ -414,7 +414,7 @@ router.put('/cancel/:id', authMiddleware, async (req, res) => {
         .json({ message: 'Cannot cancel booking after 30 minutes' })
     }
 
-    booking.status = 'canceled'
+    booking.status = 'Canceled'
     await booking.save()
 
     res.status(200).json({ result: booking, message: 'Booking canceled' })

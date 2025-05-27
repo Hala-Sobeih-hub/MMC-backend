@@ -35,6 +35,7 @@ const testimonialsController = require('./controllers/TestimonialsRoutes.js')
 const productsController = require('./controllers/ProductsRoutes.js')
 const userController = require('./controllers/user_controllers.js')
 const promotionController = require('./controllers/promotion-routes.js')
+const inquiryController = require(`./controllers/inquiry-routes.js`)
 
 //* Routes
 // app.use(authMiddleware);
@@ -46,6 +47,7 @@ app.use('/api/users', userController)
 app.use('/api/testimonials', testimonialsController)
 app.use('/api/products', productsController)
 app.use('/api/promotion', promotionController)
+app.use('/api/inquiry', inquiryController)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
