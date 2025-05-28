@@ -49,7 +49,7 @@ router.post('/', authMiddleware, async (req, res) => {
       rentalDate,
       deliveryAddress,
       eventNotes,
-      status: 'confirmed'
+      status: 'Pending'
     })
 
     //save new booking to database
@@ -303,9 +303,14 @@ router.put(
         const { _id } = req.params
 
         //get the updated fields (updated status) from the request body
-        const { status } = req.body
+        const { status, rentalDate, eventNotes, deliveryAddress } = req.body
 
-        const bookingToBeUpdated = { status }
+        const bookingToBeUpdated = {
+          status,
+          rentalDate,
+          eventNotes,
+          deliveryAddress
+        }
 
         //options: (Optional) An object specifying options such as new
         //new: If set to true, returns the modified document rather than the original. Defaults to false.
@@ -372,6 +377,50 @@ router.delete('/:_id', authMiddleware, async (req, res) => {
     res.status(500).json({
       Error: `${error.message}`
     })
+  }
+})
+
+// PUT /api/booking/:id/cancel
+router.put('/cancel/:id', authMiddleware, async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id)
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' })
+    }
+
+    // Check if booking belongs to the logged-in user
+    if (booking.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Unauthorized' })
+    }
+
+    // Check if booking is already canceled
+    if (booking.status === 'Canceled') {
+      return res.status(400).json({ message: 'Booking is already canceled' })
+    }
+
+    // Check if createdAt is within 30 minutes
+    const now = new Date()
+    const createdAt = new Date(booking.createdAt)
+    const timeDiff = (now - createdAt) / (1000 * 60) // in minutes
+
+    // console.log('Time difference in minutes:', timeDiff)
+    // console.log('Booking created at:', createdAt)
+    // console.log('Current time:', now)
+
+    if (timeDiff > 30) {
+      return res
+        .status(403)
+        .json({ message: 'Cannot cancel booking after 30 minutes' })
+    }
+
+    booking.status = 'Canceled'
+    await booking.save()
+
+    res.status(200).json({ result: booking, message: 'Booking canceled' })
+  } catch (err) {
+    console.error('Cancel booking error:', err)
+    res.status(500).json({ message: 'Server error' })
   }
 })
 

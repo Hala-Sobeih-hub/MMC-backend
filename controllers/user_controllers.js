@@ -28,7 +28,15 @@ const router = express.Router()
 
 router.post('/signup', async (req, res) => {
     try {
-        const { firstName, lastName, email, username, password, deliveryAddress, phoneNumber } = req.body;
+        const {
+            firstName,
+            lastName,
+            email,
+            username,
+            password,
+            deliveryAddress,
+            phoneNumber
+        } = req.body
 
         const passwordhashed = bcrypt.hashSync(password, +process.env.SALT)
 
@@ -39,28 +47,28 @@ router.post('/signup', async (req, res) => {
             username: username,
             password: passwordhashed,
             deliveryAddress: deliveryAddress,
-            phoneNumber: phoneNumber,
-        });
+            phoneNumber: phoneNumber
+        })
 
-        await newUser.save();
+        await newUser.save()
 
         // // Assign a token
         const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-            expiresIn: "1w",
-        });
-        console.log(token);
+            expiresIn: '1w'
+        })
+        console.log(token)
 
         res.status(200).json({
             Msg: 'Success! Account was created!',
             User: newUser,
-            Token: token,
-        });
+            Token: token
+        })
     } catch (err) {
         // console.log(err);
         if (err.code === 11000) {
             return res.status(400).json({
-                Error: 'User already exists. Try logging in.',
-            });
+                Error: 'User already exists. Try logging in.'
+            })
         }
 
         res.status(500).json({
@@ -72,12 +80,12 @@ router.post('/signup', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, password } = req.body
 
         // Find the user by email
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ username })
         if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'Invalid email or password' })
         }
 
         // Compare the provided password with the hashed password
@@ -87,9 +95,13 @@ router.post('/login', async (req, res) => {
         }
 
         // Generate a JWT token
-        const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET, {
-            expiresIn: '1w',
-        });
+        const token = jwt.sign(
+            { id: user._id, isAdmin: user.isAdmin },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '1w'
+            }
+        )
 
         // Exclude sensitive fields from the response
         const { password: _, ...userWithoutPassword } = user.toObject()
@@ -97,38 +109,40 @@ router.post('/login', async (req, res) => {
         res.status(200).json({
             Msg: 'Success! User logged in!',
             User: userWithoutPassword,
-            Token: token,
-        });
+            Token: token
+        })
     } catch (err) {
-        console.error('Login Error:', err.message);
-        res.status(500).json({ message: 'An error occurred while logging in. Please try again later.' });
+        console.error('Login Error:', err.message)
+        res.status(500).json({
+            message: 'An error occurred while logging in. Please try again later.'
+        })
     }
-});
+})
 
 router.post('/password/forgot', async (req, res) => {
     try {
-        console.log('Request Body:', req.body); // Log the request body
+        console.log('Request Body:', req.body) // Log the request body
 
-        const { email } = req.body;
+        const { email } = req.body
 
         // Validate input
         if (!email) {
-            return res.status(400).json({ message: 'Email is required.' });
+            return res.status(400).json({ message: 'Email is required.' })
         }
 
         // Find the user by email or phone number
-        const user = await User.findOne({ $or: [{ email }] });
+        const user = await User.findOne({ $or: [{ email }] })
         if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
+            return res.status(404).json({ message: 'User not found.' })
         }
 
         // Generate a password reset token
         const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-            expiresIn: '1h', // Token expires in 1 hour
-        });
+            expiresIn: '1h' // Token expires in 1 hour
+        })
 
         // Generate the reset link
-        const resetLink = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
+        const resetLink = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`
 
         // Send the password reset email
         if (email) {
@@ -136,9 +150,9 @@ router.post('/password/forgot', async (req, res) => {
                 service: 'gmail', // Use your email service
                 auth: {
                     user: process.env.EMAIL_USER, // Your email address
-                    pass: process.env.EMAIL_PASS, // Your email password
-                },
-            });
+                    pass: process.env.EMAIL_PASS // Your email password
+                }
+            })
 
             const mailOptions = {
                 from: process.env.EMAIL_USER,
@@ -148,37 +162,44 @@ router.post('/password/forgot', async (req, res) => {
                     <p>You requested a password reset. Click the link below to reset your password:</p>
                     <a href="${resetLink}">Reset Password</a>
                     <p>This link will expire in 1 hour.</p>
-                `,
-            };
+                `
+            }
 
-            await transporter.sendMail(mailOptions);
-            console.log('Password reset email sent to:', email);
+            await transporter.sendMail(mailOptions)
+            console.log('Password reset email sent to:', email)
         }
 
-        res.status(200).json({ message: 'Password reset instructions sent successfully.' });
+        res
+            .status(200)
+            .json({ message: 'Password reset instructions sent successfully.' })
     } catch (err) {
-        console.error('Forgot Password Error:', err.message);
-        res.status(500).json({ message: 'An error occurred while sending the password reset instructions. Please try again later.' });
+        console.error('Forgot Password Error:', err.message)
+        res.status(500).json({
+            message:
+                'An error occurred while sending the password reset instructions. Please try again later.'
+        })
     }
-});
+})
 
 router.post('/password/reset/:token', async (req, res) => {
     try {
-        const { newPassword } = req.body;
-        const { token } = req.params;
+        const { newPassword } = req.body
+        const { token } = req.params
 
         // Validate input
         if (!token || !newPassword) {
-            return res.status(400).json({ message: 'Token and new password are required.' });
+            return res
+                .status(400)
+                .json({ message: 'Token and new password are required.' })
         }
 
         // Verify the token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
         // Find the user by ID
-        const user = await User.findById(decoded.id);
+        const user = await User.findById(decoded.id)
         if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
+            return res.status(404).json({ message: 'User not found.' })
         }
 
         // // Check if the token has already been used
@@ -187,34 +208,40 @@ router.post('/password/reset/:token', async (req, res) => {
         // }
 
         // Check if the new password matches the old password
-        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+        const isSamePassword = await bcrypt.compare(newPassword, user.password)
         if (isSamePassword) {
-            return res.status(400).json({ message: 'New password cannot be the same as the old password.' });
+            return res.status(400).json({
+                message: 'New password cannot be the same as the old password.'
+            })
         }
 
         // Validate password complexity
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        const passwordRegex =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
         if (!passwordRegex.test(newPassword)) {
             return res.status(400).json({
                 message:
-                    'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.',
-            });
+                    'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.'
+            })
         }
 
         // Hash the new password
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
 
         // Update the user's password and mark the token as used
-        user.password = hashedPassword;
-        user.passwordResetTokenUsed = true; // Mark the token as used
-        await user.save();
+        user.password = hashedPassword
+        user.passwordResetTokenUsed = true // Mark the token as used
+        await user.save()
 
-        res.status(200).json({ message: 'Password updated successfully.' });
+        res.status(200).json({ message: 'Password updated successfully.' })
     } catch (err) {
-        console.error('Reset Password Error:', err.message);
-        res.status(500).json({ message: 'An error occurred while resetting the password. Please try again later.' });
+        console.error('Reset Password Error:', err.message)
+        res.status(500).json({
+            message:
+                'An error occurred while resetting the password. Please try again later.'
+        })
     }
-});
+})
 
 // User updates their profile
 router.delete('/delete/:id', authMiddleware, async (req, res) => {
@@ -330,104 +357,118 @@ router.post('/request-deletion', authMiddleware, async (req, res) => {
 })
 
 // Admin views all pending deletion requests
-router.get('/deletion-requests', /*authMiddleware,*/ isAdmin, async (req, res) => {
-    try {
-        if (!req.user.isAdmin) {
-            return res.status(403).json({ message: 'Access denied. Admins only.' })
-        }
+router.get(
+    '/deletion-requests',
+  /*authMiddleware,*/ isAdmin,
+    async (req, res) => {
+        try {
+            if (!req.user.isAdmin) {
+                return res.status(403).json({ message: 'Access denied. Admins only.' })
+            }
 
-        const pendingRequests = await User.find({ deletionRequest: true }).select(
-            'firstName lastName email deletionRequest'
-        )
-
-        res.status(200).json({
-            pendingRequests,
-        });
-    } catch (err) {
-        console.error('Get Deletion Requests Error:', err.message);
-        res.status(500).json({ message: 'An error occurred while fetching deletion requests. Please try again later.' });
-    }
-});
-
-
-
-// Admin approves or rejects a deletion request
-router.patch('/deletion-requests/:userId', /*authMiddleware,*/ async (req, res) => {
-    try {
-        if (!req.user.isAdmin) {
-            return res.status(403).json({ message: 'Access denied. Admins only.' })
-        }
-
-        const { userId } = req.params
-        const { action } = req.body // 'approve' or 'reject'
-
-        const user = await User.findById(userId)
-        if (!user) {
-            return res.status(404).json({ message: 'User not found.' })
-        }
-
-        if (!user.deletionRequest) {
-            return res
-                .status(400)
-                .json({ message: 'This user has not requested account deletion.' })
-        }
-
-        if (action === 'approve') {
-            // Delete the user
-            await User.findByIdAndDelete(userId)
+            const pendingRequests = await User.find({ deletionRequest: true }).select(
+                'firstName lastName email deletionRequest'
+            )
 
             res.status(200).json({
-                message: 'Deletion request approved and user account deleted.'
+                pendingRequests
             })
-        } else if (action === 'reject') {
-            // Update the user's deletionRequest field
-            user.deletionRequest = false
-            await user.save()
-
-            res.status(200).json({ message: 'Deletion request rejected.' })
-        } else {
-            res
-                .status(400)
-                .json({ message: 'Invalid action. Use "approve" or "reject".' })
+        } catch (err) {
+            console.error('Get Deletion Requests Error:', err.message)
+            res.status(500).json({
+                message:
+                    'An error occurred while fetching deletion requests. Please try again later.'
+            })
         }
-    } catch (err) {
-        console.error('Process Deletion Request Error:', err.message)
-        res.status(500).json({
-            message:
-                'An error occurred while processing the deletion request. Please try again later.'
-        })
     }
-})
+)
+
+// Admin approves or rejects a deletion request
+router.patch(
+    '/deletion-requests/:userId',
+  /*authMiddleware,*/ async (req, res) => {
+        try {
+            if (!req.user.isAdmin) {
+                return res.status(403).json({ message: 'Access denied. Admins only.' })
+            }
+
+            const { userId } = req.params
+            const { action } = req.body // 'approve' or 'reject'
+
+            const user = await User.findById(userId)
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' })
+            }
+
+            if (!user.deletionRequest) {
+                return res
+                    .status(400)
+                    .json({ message: 'This user has not requested account deletion.' })
+            }
+
+            if (action === 'approve') {
+                // Delete the user
+                await User.findByIdAndDelete(userId)
+
+                res.status(200).json({
+                    message: 'Deletion request approved and user account deleted.'
+                })
+            } else if (action === 'reject') {
+                // Update the user's deletionRequest field
+                user.deletionRequest = false
+                await user.save()
+
+                res.status(200).json({ message: 'Deletion request rejected.' })
+            } else {
+                res
+                    .status(400)
+                    .json({ message: 'Invalid action. Use "approve" or "reject".' })
+            }
+        } catch (err) {
+            console.error('Process Deletion Request Error:', err.message)
+            res.status(500).json({
+                message:
+                    'An error occurred while processing the deletion request. Please try again later.'
+            })
+        }
+    }
+)
 
 // Admin sends an invitation to a potential admin
 router.post('/invite-admin', authMiddleware, isAdmin, async (req, res) => {
     try {
-        const { email } = req.body;
+        const { email } = req.body
 
         // Validate email
         if (!email) {
-            return res.status(400).json({ message: 'Email is required.' });
+            return res.status(400).json({ message: 'Email is required.' })
         }
 
         // Check if the user already exists
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ email })
         if (existingUser) {
-            return res.status(400).json({ message: 'User with this email already exists.' });
+            return res
+                .status(400)
+                .json({ message: 'User with this email already exists.' })
         }
 
         // Generate a unique invitation token
-        const invitationToken = jwt.sign({ email, role: 'Admin' }, process.env.JWT_SECRET, {
-            expiresIn: '1d', // Token expires in 1 day
-        });
+        const invitationToken = jwt.sign(
+            { email, role: 'Admin' },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '1d' // Token expires in 1 day
+            }
+        )
 
         // Send the invitation email
         const transporter = nodemailer.createTransport({
             service: 'gmail', // Use your email service
             auth: {
                 user: process.env.EMAIL_USER, // Your email address
-                pass: process.env.EMAIL_PASS, // Your email password
-            },
-        });
+                pass: process.env.EMAIL_PASS // Your email password
+            }
+        })
 
         const mailOptions = {
             from: process.env.EMAIL_USER,
@@ -438,155 +479,123 @@ router.post('/invite-admin', authMiddleware, isAdmin, async (req, res) => {
                 <p>Click the link below to accept the invitation:</p>
                 <a href="${process.env.FRONTEND_URL}/accept-invitation?token=${invitationToken}">Accept Invitation</a>
                 <p>This link will expire in 24 hours.</p>
-            `,
-        };
+            `
+        }
 
-        await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions)
 
-        res.status(200).json({ message: 'Invitation email sent successfully.' });
+        res.status(200).json({ message: 'Invitation email sent successfully.' })
     } catch (err) {
-        console.error('Error sending admin invitation:', err.message);
-        res.status(500).json({ message: 'An error occurred while sending the invitation email.' });
+        console.error('Error sending admin invitation:', err.message)
+        res.status(500).json({
+            message: 'An error occurred while sending the invitation email.'
+        })
     }
-});
+})
 
 router.post('/accept-invitation', async (req, res) => {
     try {
-        const { token, password } = req.body;
+        const { token, password } = req.body
 
         // Validate input
         if (!token || !password) {
-            return res.status(400).json({ message: 'Token and password are required.' });
+            return res
+                .status(400)
+                .json({ message: 'Token and password are required.' })
         }
 
         // Verify the token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
         // Check if the user already exists
-        const existingUser = await User.findOne({ email: decoded.email });
+        const existingUser = await User.findOne({ email: decoded.email })
         if (existingUser) {
-            return res.status(400).json({ message: 'User with this email already exists.' });
+            return res
+                .status(400)
+                .json({ message: 'User with this email already exists.' })
         }
 
         // Create the new admin user
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10)
         const newUser = await User.create({
             email: decoded.email,
             password: hashedPassword,
-            role: decoded.role, // Set role to 'Admin'
-        });
+            role: decoded.role // Set role to 'Admin'
+        })
 
-        res.status(201).json({ message: 'Admin account created successfully.', user: newUser });
+        res
+            .status(201)
+            .json({ message: 'Admin account created successfully.', user: newUser })
     } catch (err) {
-        console.error('Error accepting admin invitation:', err.message);
-        res.status(500).json({ message: 'An error occurred while accepting the invitation.' });
+        console.error('Error accepting admin invitation:', err.message)
+        res
+            .status(500)
+            .json({ message: 'An error occurred while accepting the invitation.' })
     }
-});
+})
 
-router.patch('/update-role/:userId', authMiddleware, isAdmin, async (req, res) => {
+router.patch(
+    '/update-role/:userId',
+    authMiddleware,
+    isAdmin,
+    async (req, res) => {
+        try {
+            const { userId } = req.params
+            const { role } = req.body
+
+            // Validate input
+            if (!role) {
+                return res.status(400).json({ message: 'Role is required.' })
+            }
+
+            // Find the user by ID
+            const user = await User.findById(userId)
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' })
+            }
+            if (role == 'Admin') {
+                user.isAdmin = true
+            } else {
+                user.isAdmin = false
+            }
+            // Update the user's role
+            user.role = role
+            await user.save()
+
+            res.status(200).json({ message: 'User role updated successfully.', user })
+        } catch (err) {
+            console.error('Error updating user role:', err.message)
+            res
+                .status(500)
+                .json({ message: 'An error occurred while updating the user role.' })
+        }
+    }
+)
+
+//Hala made this change
+// User gets their own profile
+router.get('/my-profile', authMiddleware, async (req, res) => {
     try {
-        const { userId } = req.params;
-        const { role } = req.body;
-
-        // Validate input
-        if (!role) {
-            return res.status(400).json({ message: 'Role is required.' });
+        // Check if the user is authenticated
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorized. Please log in.' })
         }
 
         // Find the user by ID
-        const user = await User.findById(userId);
+        const user = await User.findById(req.user.id)
+
         if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
+            return res.status(404).json({ message: 'User not found.' })
         }
-        if (role == "Admin") {
-            user.isAdmin = true;
-        } else {
-            user.isAdmin = false;
-        }
-        // Update the user's role
-        user.role = role;
-        await user.save();
 
-        res.status(200).json({ message: 'User role updated successfully.', user });
+        res.status(200).json({ result: user })
     } catch (err) {
-        console.error('Error updating user role:', err.message);
-        res.status(500).json({ message: 'An error occurred while updating the user role.' });
+        console.error('Get Profile Error:', err.message)
+        res.status(500).json({
+            message:
+                'An error occurred while fetching the profile. Please try again later.'
+        })
     }
-});
-
-// Get current user's profile
-router.get('/my-profile', authMiddleware, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id).select('-password');
-        if (!user) {
-            return res.status(404).json({ message: "User not found." });
-        }
-        res.status(200).json({ result: user });
-    } catch (err) {
-        console.error("Get Profile Error:", err.message);
-        res.status(500).json({ message: "An error occurred while fetching the profile." });
-    }
-});
-
-// Update current user's profile
-router.put('/update-profile', authMiddleware, async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const {
-            firstName,
-            lastName,
-            email,
-            phoneNumber,
-            deliveryAddress,
-            profilePic
-        } = req.body;
-
-        const updateFields = {};
-        if (firstName !== undefined) updateFields.firstName = firstName;
-        if (lastName !== undefined) updateFields.lastName = lastName;
-        if (email !== undefined) updateFields.email = email;
-        if (phoneNumber !== undefined) updateFields.phoneNumber = phoneNumber;
-        if (deliveryAddress !== undefined) updateFields.deliveryAddress = deliveryAddress;
-        if (profilePic !== undefined) updateFields.profilePic = profilePic;
-
-        const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            { $set: updateFields },
-            { new: true }
-        );
-
-        if (!updatedUser) {
-            return res.status(404).json({ message: "User not found." });
-        }
-
-        res.status(200).json({
-            message: "Profile updated successfully.",
-            user: updatedUser
-        });
-    } catch (err) {
-        console.error("Update Profile Error:", err.message);
-        res.status(500).json({ message: "An error occurred while updating the profile." });
-    }
-});
-
-// Profile picture upload endpoint
-router.post(
-    "/upload-profile-pic",
-    authMiddleware,
-    upload.single("profilePic"),
-    async (req, res) => {
-        if (!req.file) {
-            return res.status(400).json({ message: "No file uploaded" });
-        }
-        // You might want to save the file path to the user's profile here
-        // For now, just return the file URL
-        const url = `/uploads/profile-pics/${req.file.filename}`;
-        // Optionally update user profilePic in DB:
-        await User.findByIdAndUpdate(req.user.id, { profilePic: url });
-        res.json({ url });
-    }
-);
-
-
+})
 
 module.exports = router
