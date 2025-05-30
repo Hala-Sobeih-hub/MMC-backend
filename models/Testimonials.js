@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 const TestimonialsSchema = new mongoose.Schema(
     {
-        userId: { type: String, required: true },
         name: { type: String, required: true },
         reviews: { type: String, required: true },
         rating: {

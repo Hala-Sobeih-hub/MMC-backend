@@ -13,24 +13,23 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.post('/create',AuthMiddleware ,async (req, res) => {
+router.post('/create', async (req, res) => {
   try {
-    const { _id } = req.user // Get the user from the request object
-     const { name, reviews, rating } = req.body // Destructure the request body to get testimonial data
+
+    const { name, reviews, rating } = req.body // Destructure the request body to get testimonial data
     console.log('Received testimonial data:', req.body) // Log the received data for debugging
-    if (!_id || !name || !reviews || !rating) {
+    if (!name || !reviews || !rating) {
       // Check if all required fields are provided
       return res.status(400).json({ message: 'All fields are required' }) // Send a 400 status with an error message
     }
 
     // Create a new testimonial instance
     const newTestimonial = new Testimonials({
-      userId: _id, // Use the user ID from the request object
       name,
       reviews,
       rating
     })
-    
+
 
     // Save the testimonial to the database
     const savedTestimonial = await newTestimonial.save()

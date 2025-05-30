@@ -23,7 +23,7 @@ router.post('/', async (req, res) => {
       inquiryDescription
     }
 
-    // console.log('New Inquiry:', newInquiry)
+    console.log('New Inquiry:', newInquiry)
     // Send an email notification to the admin
     const transporter = nodemailer.createTransport({
       service: 'gmail',
